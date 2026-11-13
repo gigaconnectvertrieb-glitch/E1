@@ -41,6 +41,23 @@ async function clearWebhook() {
   webhookCleared = true;
 }
 
+function extractCode(text) {
+  const matches = [];
+  const re = /(\d{6})/g;
+  let match;
+  while ((match = re.exec(text)) !== null) {
+    matches.push({ code: match[1], index: match.index });
+  }
+  if (!matches.length) return null;
+  const keyword = text.toLowerCase().search(/code|best(ä|ae)tigung|verifizierung/);
+  if (keyword >= 0) {
+    matches.sort(function (a, b) {
+      return Math.abs(a.index - keyword) - Math.abs(b.index - keyword);
+    });
+  }
+  return matches[0].code;
+}
+
 async function drainUpdates() {
   const updates = await api('getUpdates', { offset, timeout: 0, allowed_updates: ['message'] });
   for (const update of updates) offset = update.update_id + 1;
@@ -67,8 +84,12 @@ async function doRequestCode(prompt, timeoutMs) {
       if (!message || !message.text) continue;
       if (String(message.chat.id) !== String(CHAT_ID)) continue;
       if (message.date && message.date < startedAt - 10) continue;
-      const match = message.text.match(/\b(\d{6})\b/);
-      if (match) return match[1];
+      const code = extractCode(message.text);
+      if (code) {
+        console.log('telegram mfa text:', message.text.replace(/\s+/g, ' ').slice(0, 180));
+        console.log('telegram mfa code:', code);
+        return code;
+      }
     }
   }
   return null;

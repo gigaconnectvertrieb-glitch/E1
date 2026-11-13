@@ -23,6 +23,7 @@ function cookieHeader(jar) {
 export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
   const base = String(baseUrl || '').replace(/\/+$/, '');
   const path = tariffPath || '/tarifrechner/';
+  const maxAttempts = Math.max(1, Number(process.env.TG_MFA_ATTEMPTS || 1));
   let jar = null;
 
   async function request(url, options) {
@@ -123,8 +124,9 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
 
     if (hasMfa(result.html)) {
       if (!telegramEnabled()) throw new Error('mfa_required');
+      const label = maxAttempts > 1 ? ' (Versuch ' + attempt + '/' + maxAttempts + ')' : '';
       const code = await requestCode(
-        'E1 Portal (Versuch ' + attempt + '/2): Der Code geht an gigaconnectvertrieb@gmail.com (auch Spam prüfen). Bitte NUR die 6 Ziffern aus der neuesten Mail senden. Alte Codes sind ungültig.'
+        'E1 Portal' + label + ': Der Code geht an gigaconnectvertrieb@gmail.com (auch Spam prüfen). Bitte NUR die 6 Ziffern aus der NEUESTEN Mail senden. Alte Codes sind ungültig.'
       );
       if (!code) throw new Error('mfa_timeout');
       await sendMessage('E1 Portal: Code empfangen, wird geprüft …').catch(function () {});
@@ -155,17 +157,17 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
 
   async function login() {
     let lastError = null;
-    for (let attempt = 1; attempt <= 2; attempt += 1) {
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
         return await loginAttempt(attempt);
       } catch (err) {
         lastError = err;
-        if (err.message === 'mfa_rejected' && attempt === 1) {
+        if (err.message === 'mfa_rejected') {
           await sendMessage(
-            'E1 Portal: Code abgelehnt. Neuer Code wird angefordert — bitte die neueste E-Mail nutzen.'
+            'E1 Portal: Code abgelehnt. Bitte im Admin neu verbinden und die neueste E-Mail nutzen.'
           ).catch(function () {});
-          continue;
         }
+        if (err.message === 'mfa_rejected' && attempt < maxAttempts) continue;
         throw err;
       }
     }
