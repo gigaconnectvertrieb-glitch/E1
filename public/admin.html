@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leads — E1 EnergyOne Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body class="admin-body">
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/" aria-label="E1 EnergyOne Startseite">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect width="40" height="40" rx="11" fill="#b8ff2e"/>
+        <path d="M22.8 6.5 11.5 22.2h7.1L16 33.5l11.9-16.9h-7.2l2.1-10.1Z" fill="#0a1203"/>
+      </svg>
+      <span>E1<small>EnergyOne</small></span>
+    </a>
+    <div class="nav-cta">
+      <a class="btn btn-ghost btn-sm" href="/">Website</a>
+    </div>
+  </div>
+</header>
+
+<main class="admin-shell">
+  <div class="container">
+
+    <section id="login" class="admin-login" hidden>
+      <h1>Admin Login</h1>
+      <p>Token aus der Umgebungsvariable E1_ADMIN_TOKEN oder aus data/admin-token.txt.</p>
+      <form id="login-form">
+        <div class="field">
+          <label for="admin-token">Admin-Token</label>
+          <input id="admin-token" name="token" type="password" autocomplete="current-password" required>
+        </div>
+        <div class="form-status" id="login-status" role="status" aria-live="polite"></div>
+        <button class="btn btn-primary btn-block" type="submit">Anmelden</button>
+      </form>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="admin-top">
+        <div>
+          <h1>Leads</h1>
+          <p class="muted tiny" id="storage-info"></p>
+        </div>
+        <div class="admin-actions">
+          <a class="btn btn-ghost btn-sm" href="/api/leads.csv">CSV Export</a>
+          <button class="btn btn-ghost btn-sm" id="refresh" type="button">Aktualisieren</button>
+          <button class="btn btn-ghost btn-sm" id="logout" type="button">Abmelden</button>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span>Gesamt</span><strong id="stat-total">0</strong></div>
+        <div class="stat"><span>Neu</span><strong id="stat-neu">0</strong></div>
+        <div class="stat"><span>Kontaktiert</span><strong id="stat-kontaktiert">0</strong></div>
+        <div class="stat"><span>Angebot</span><strong id="stat-angebot">0</strong></div>
+        <div class="stat"><span>Gewonnen</span><strong id="stat-gewonnen">0</strong></div>
+        <div class="stat"><span>Verloren</span><strong id="stat-verloren">0</strong></div>
+      </div>
+
+      <form class="filters" id="filters">
+        <select name="status" aria-label="Status filtern">
+          <option value="">Alle Status</option>
+          <option value="neu">Neu</option>
+          <option value="kontaktiert">Kontaktiert</option>
+          <option value="angebot">Angebot</option>
+          <option value="gewonnen">Gewonnen</option>
+          <option value="verloren">Verloren</option>
+          <option value="spam">Spam</option>
+        </select>
+        <select name="typ" aria-label="Kundentyp filtern">
+          <option value="">Privat + Gewerbe</option>
+          <option value="privat">Privat</option>
+          <option value="gewerbe">Gewerbe</option>
+        </select>
+        <select name="produkt" aria-label="Produkt filtern">
+          <option value="">Strom + Gas</option>
+          <option value="strom">Strom</option>
+          <option value="gas">Gas</option>
+        </select>
+        <input type="search" name="q" placeholder="Suche: Name, Firma, E-Mail, PLZ" aria-label="Leads durchsuchen">
+        <button class="btn btn-primary btn-sm" type="submit">Filtern</button>
+      </form>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Datum</th>
+              <th>Typ</th>
+              <th>Produkt</th>
+              <th>Name / Firma</th>
+              <th>Kontakt</th>
+              <th>PLZ / Ort</th>
+              <th>Verbrauch</th>
+              <th>Preis / Jahr</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="leads-body"></tbody>
+        </table>
+        <div class="empty" id="empty" hidden>Keine Leads für diese Filter.</div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<dialog id="lead-dialog">
+  <div class="dialog-head">
+    <h2 id="dialog-title">Lead</h2>
+    <button class="btn btn-ghost btn-sm" id="dialog-close" type="button">Schließen</button>
+  </div>
+  <div class="dialog-body">
+    <div class="dialog-grid" id="dialog-details"></div>
+    <div class="field">
+      <label for="dialog-status-sel">Status</label>
+      <select id="dialog-status-sel">
+        <option value="neu">Neu</option>
+        <option value="kontaktiert">Kontaktiert</option>
+        <option value="angebot">Angebot</option>
+        <option value="gewonnen">Gewonnen</option>
+        <option value="verloren">Verloren</option>
+        <option value="spam">Spam</option>
+      </select>
+    </div>
+    <div class="field" id="dialog-note-wrap">
+      <label for="dialog-note">Notiz</label>
+      <textarea id="dialog-note" rows="4" placeholder="Gespräch, Angebot, nächster Schritt …"></textarea>
+    </div>
+    <div class="form-status" id="dialog-status" role="status" aria-live="polite"></div>
+    <div class="admin-actions">
+      <button class="btn btn-primary btn-sm" id="dialog-save" type="button">Speichern</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="/assets/admin.js"></script>
+</body>
+</html>

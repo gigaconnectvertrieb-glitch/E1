@@ -1,0 +1,17 @@
+{
+  "name": "e1-direktvertrieb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E1 EnergyOne - Lead- und Angebotsplattform fuer Strom und Gas (Privat- und Gewerbekunden)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  }
+}

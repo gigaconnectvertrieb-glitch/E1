@@ -1,0 +1,27 @@
+{
+  "_note": "PLATZHALTER-PREISE. Vor Livegang durch die echten E1-Tarifblätter ersetzen. Rechenlogik: Jahrespreis = Grundpreis*12 + Arbeitspreis/100 * kWh.",
+  "strom": {
+    "label": "Strom",
+    "einheit": "kWh",
+    "grundpreis_monat": 9.9,
+    "arbeitspreis_ct": 28.9,
+    "referenz_grundpreis_monat": 13.9,
+    "referenz_ct": 40.2,
+    "default_verbrauch": 2800,
+    "min_verbrauch": 500,
+    "max_verbrauch": 60000,
+    "presets": [1500, 2800, 4000, 5500]
+  },
+  "gas": {
+    "label": "Gas",
+    "einheit": "kWh",
+    "grundpreis_monat": 12.9,
+    "arbeitspreis_ct": 9.8,
+    "referenz_grundpreis_monat": 16.9,
+    "referenz_ct": 13.5,
+    "default_verbrauch": 20000,
+    "min_verbrauch": 1000,
+    "max_verbrauch": 400000,
+    "presets": [12000, 20000, 30000, 45000]
+  }
+}
