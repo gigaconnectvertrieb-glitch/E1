@@ -134,9 +134,12 @@ function rowValues(value, kalkulation, meta) {
 async function createStore() {
   if (USE_POSTGRES) {
     const pg = await import('pg');
+    let ssl;
+    if (process.env.DATABASE_SSL === 'false') ssl = false;
+    else if (process.env.DATABASE_SSL === 'true') ssl = { rejectUnauthorized: false };
     const pool = new pg.default.Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.DATABASE_SSL === 'false' ? false : { rejectUnauthorized: false },
+      ssl,
       max: 5
     });
     await pool.query(CREATE_PG);

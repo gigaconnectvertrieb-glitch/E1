@@ -5,7 +5,7 @@
   "description": "E1 EnergyOne - Lead- und Angebotsplattform fuer Strom und Gas (Privat- und Gewerbekunden)",
   "type": "module",
   "engines": {
-    "node": ">=22.5.0"
+    "node": ">=24"
   },
   "scripts": {
     "start": "node server.mjs",

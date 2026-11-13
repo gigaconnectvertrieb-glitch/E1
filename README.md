@@ -22,7 +22,7 @@ npm start
 - Admin: http://127.0.0.1:8787/admin
 - Token: `data/admin-token.txt` (wird beim ersten Start erzeugt) oder `E1_ADMIN_TOKEN`
 
-Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **22.5+** ist Pflicht (`node:sqlite`).
+Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **24+** ist Pflicht (`node:sqlite`).
 
 ## Konfiguration
 
@@ -56,7 +56,7 @@ Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **22.5+
 1. **New → Web Service**, Repo verbinden.
 2. Runtime: Node. Build: `npm install`. Start: `node server.mjs`.
 3. Plan: Free. Health Check: `/healthz`.
-4. Env: `NODE_VERSION=22.11.0`, `HOST=0.0.0.0`, `E1_ADMIN_TOKEN=<zufällig>`.
+4. Env: `NODE_VERSION=24`, `HOST=0.0.0.0`, `E1_ADMIN_TOKEN=<zufällig>`.
 
 ### Wichtig: Free-Disk ist ephemer
 
