@@ -124,7 +124,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     if (hasMfa(result.html)) {
       if (!telegramEnabled()) throw new Error('mfa_required');
       const code = await requestCode(
-        'E1 Portal (Versuch ' + attempt + '/2): Bitte NUR die 6 Ziffern aus der E-Mail senden, die gerade jetzt ankommt. Alte Codes sind ungültig.'
+        'E1 Portal (Versuch ' + attempt + '/2): Der Code geht an gigaconnectvertrieb@gmail.com (auch Spam prüfen). Bitte NUR die 6 Ziffern aus der neuesten Mail senden. Alte Codes sind ungültig.'
       );
       if (!code) throw new Error('mfa_timeout');
       await sendMessage('E1 Portal: Code empfangen, wird geprüft …').catch(function () {});
