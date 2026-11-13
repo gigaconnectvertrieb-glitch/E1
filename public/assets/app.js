@@ -156,6 +156,12 @@
 
       data.typ = form.getAttribute('data-typ') || data.typ || 'privat';
 
+      var sp = new URLSearchParams(window.location.search);
+      var src = sp.get('src') || sp.get('utm_source') || 'website';
+      var camp = sp.get('utm_campaign');
+      if (camp) src += ':' + camp;
+      data.quelle = src.replace(/[^a-zA-Z0-9:_-]/g, '').slice(0, 60) || 'website';
+
       form.querySelectorAll('.err').forEach(function (el) { el.textContent = ''; });
 
       if (status) {
