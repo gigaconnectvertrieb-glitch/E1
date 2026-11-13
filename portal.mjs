@@ -98,7 +98,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     return null;
   }
 
-  async function login() {
+  async function loginAttempt(attempt) {
     if (!user || !pass) throw new Error('portal_credentials_missing');
     if (!base) throw new Error('portal_url_missing');
 
@@ -124,9 +124,10 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     if (hasMfa(result.html)) {
       if (!telegramEnabled()) throw new Error('mfa_required');
       const code = await requestCode(
-        'E1 Portal: Bitte den 6-stelligen MFA-Code aus der neuesten E-Mail senden.'
+        'E1 Portal (Versuch ' + attempt + '/2): Bitte NUR die 6 Ziffern aus der E-Mail senden, die gerade jetzt ankommt. Alte Codes sind ungültig.'
       );
       if (!code) throw new Error('mfa_timeout');
+      await sendMessage('E1 Portal: Code empfangen, wird geprüft …').catch(function () {});
 
       const confirmed = await request(result.url || base + '/', {
         method: 'POST',
@@ -135,7 +136,8 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
       });
 
       if (hasMfa(confirmed.html)) {
-        await sendMessage('E1 Portal: Code abgelehnt. Bitte neu verbinden.').catch(function () {});
+        const errMatch = confirmed.html.match(/Der eingegebene[^<]{0,160}/i);
+        console.error('portal mfa:', errMatch ? errMatch[0] : 'rejected');
         throw new Error('mfa_rejected');
       }
       if (!isLoggedIn(confirmed.html)) throw new Error('login_failed');
@@ -149,6 +151,25 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
 
     await saveJar(nextJar);
     return { jar: nextJar, status: result.status, url: result.url, html: result.html };
+  }
+
+  async function login() {
+    let lastError = null;
+    for (let attempt = 1; attempt <= 2; attempt += 1) {
+      try {
+        return await loginAttempt(attempt);
+      } catch (err) {
+        lastError = err;
+        if (err.message === 'mfa_rejected' && attempt === 1) {
+          await sendMessage(
+            'E1 Portal: Code abgelehnt. Neuer Code wird angefordert — bitte die neueste E-Mail nutzen.'
+          ).catch(function () {});
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastError || new Error('login_failed');
   }
 
   async function ensure() {
