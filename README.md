@@ -6,7 +6,7 @@ Lead- und Angebotsplattform für Strom und Gas. Privat- und Gewerbekunden, Preis
 
 - **Landingpage** mit Live-Preisrechner (Strom/Gas), Presets, Ersparnis-Anzeige
 - **Gewerbeseite** mit B2B-Rechner und erweitertem Anfrageformular
-- **Lead-Engine**: Validierung, Honeypot, Rate-Limit, SQLite oder Postgres
+- **Lead-Engine**: zweistufiges Formular, PDF-Upload der letzten Rechnung, Validierung, Honeypot, Rate-Limit, SQLite oder Postgres
 - **Admin** unter `/admin`: Login per Token, Filter, Status-Pipeline, Notizen, CSV-Export
 - **Rechtstexte** als Muster: Impressum, Datenschutz, AGB, Widerruf
 - **Doku** zu Marktrollen, Lieferantenwechsel, Vertragspflichten, Go-to-Market, Betrieb
@@ -22,7 +22,7 @@ npm start
 - Admin: http://127.0.0.1:8787/admin
 - Token: `data/admin-token.txt` (wird beim ersten Start erzeugt) oder `E1_ADMIN_TOKEN`
 
-Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **24+** ist Pflicht (`node:sqlite`).
+Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **22.13+** ist Pflicht, empfohlen **24** (Render ist auf 24 gepinnt). PDFs werden als Blob in derselben Datenbank gespeichert — mit Postgres überleben sie Deploys, mit SQLite nicht.
 
 ## Konfiguration
 
@@ -131,7 +131,7 @@ E1-Direktvertrieb/
 ## Vor dem Livegang
 
 1. `config/tariffs.json` mit echten Preisen füllen.
-2. FILL-Felder in Impressum, Datenschutz, AGB, Widerruf ersetzen.
+2. Anschrift, Telefon und E-Mail in den Rechtstexten ergänzen, sobald sie feststehen.
 3. AGB/Widerruf an das Versorgungsmodell anpassen (eigener Versorger vs. Vermittlung) und rechtlich prüfen lassen.
 4. `DATABASE_URL` setzen, damit Leads persistent sind.
 5. `E1_ADMIN_TOKEN` sicher aufbewahren.

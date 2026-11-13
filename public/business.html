@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gewerbestrom &amp; Gewerbegas — E1 EnergyOne</title>
-  <meta name="description" content="E1 EnergyOne für Gewerbekunden: mehrere Zählpunkte bündeln, Rahmenverträge, Lastprofile, persönlicher Ansprechpartner. Jetzt Gewerbeanfrage stellen.">
+  <meta name="description" content="E1 Direktvertrieb für Gewerbekunden: mehrere Zählpunkte bündeln, Rahmenverträge, Lastprofile, persönlicher Ansprechpartner. Jetzt Gewerbeanfrage stellen.">
   <meta property="og:title" content="Gewerbestrom &amp; Gewerbegas — E1 EnergyOne">
   <meta property="og:description" content="Standorte bündeln, Preise planen, Wechsel digital abwickeln. Ein Ansprechpartner für alle Zählpunkte.">
   <meta property="og:type" content="website">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/styles.css?v=2">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
       <a href="#rechner">Preisrechner</a>
       <a href="#vorteile">Vorteile</a>
       <a href="#ablauf">Ablauf</a>
-      <a href="#anfrage">Anfrage</a>
+      <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-cta">
       <a class="btn btn-primary btn-sm" href="#anfrage">Gewerbeanfrage</a>
@@ -40,17 +40,21 @@
 
 <main>
 
-<section class="hero">
+<section class="hero" id="rechner">
   <div class="container hero-grid">
-    <div>
+    <div class="hero-copy">
       <span class="eyebrow">Gewerbe &amp; B2B</span>
-      <h1>Energie für Betriebe.<br><span class="grad">Gebündelt.</span></h1>
-      <p class="lead">Ein Standort oder zwanzig: E1 EnergyOne bündelt Strom und Gas für Gewerbekunden unter einem Vertrag — mit klaren Preisen, einem Ansprechpartner und digitaler Abwicklung.</p>
+      <h1>Gewerbeenergie.<br><span class="grad">Ein Vertrag. Alle Standorte.</span></h1>
+      <p class="lead">E1 EnergyOne bündelt Strom und Gas für Betriebe: Zählpunkte, Lastprofile, Abrechnung. Ein Ansprechpartner, planbare Preise, kein Papierkram.</p>
       <ul class="hero-points">
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mehrere Zählpunkte</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Rahmenvertrag</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Persönlicher Kontakt</li>
       </ul>
+      <div class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        <span>Nächster möglicher Wechsel: <strong data-switch-date>–</strong></span>
+      </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#anfrage">Gewerbeanfrage stellen</a>
         <a class="btn btn-ghost" href="#ablauf">Ablauf ansehen</a>
@@ -59,7 +63,10 @@
 
     <div class="calc" id="calc" aria-label="Gewerbe-Preisrechner">
       <div class="calc-head">
-        <h2>Gewerbepreis in 20 Sekunden</h2>
+        <div>
+          <span class="calc-kicker">Gewerberechner</span>
+          <h2>Dein Preis. Sofort.</h2>
+        </div>
         <span class="live-dot">Live</span>
       </div>
       <div class="seg" role="group" aria-label="Energieart wählen">
@@ -79,49 +86,54 @@
         </div>
         <div class="field">
           <label for="calc-verbrauch">Jahresverbrauch (kWh)</label>
-          <input id="calc-verbrauch" inputmode="numeric" placeholder="20000" autocomplete="off">
+          <input id="calc-verbrauch" inputmode="numeric" placeholder="45000" autocomplete="off">
         </div>
         <div class="field full">
           <div class="presets" id="presets"></div>
         </div>
       </div>
       <div class="result">
-        <div class="result-label">Dein Preis pro Jahr</div>
+        <div class="result-anchor">
+          <span>Durchschnittspreis</span>
+          <s id="out-ref">–</s>
+        </div>
+        <div class="result-label">Dein Preis bei E1<span id="out-context"></span></div>
         <div class="result-top">
           <div class="result-price"><span id="out-jahr">–</span><small> € / Jahr</small></div>
           <div class="saving" id="out-saving">–</div>
         </div>
         <div class="result-rows">
           <div class="result-row"><span>entspricht pro Monat</span><strong id="out-monat">–</strong></div>
-          <div class="result-row"><span>Vergleich Durchschnittspreis</span><strong id="out-ref">–</strong></div>
+          <div class="result-row"><span>Ersparnis pro Jahr</span><strong id="out-sparen">–</strong></div>
         </div>
         <div class="calc-note">Unverbindliche Beispielrechnung ohne Lastprofil, Netzentgelte und Steuern im Detail. Das verbindliche Gewerbeangebot folgt nach Prüfung der Zählpunkte.</div>
       </div>
       <a class="btn btn-primary btn-block" href="#anfrage">Gewerbeangebot anfordern</a>
+      <p class="micro center">Keine Zahlungsdaten. Kein Vertrag. Nur eine Anfrage.</p>
     </div>
   </div>
 </section>
 
-<div class="trust">
-  <div class="container trust-inner">
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/></svg>
-      <div><strong>Ein Vertrag</strong><span>Alle Zählpunkte</span></div>
+<section class="stats-band">
+  <div class="container stats-grid">
+    <div class="stat-big">
+      <strong>1</strong>
+      <span>Vertrag für alle Zählpunkte</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19V5m0 14h16M8 15l3-4 3 2 4-6"/></svg>
-      <div><strong>Planbare Preise</strong><span>Klare Konditionen</span></div>
+    <div class="stat-big">
+      <strong>1</strong>
+      <span>Ansprechpartner für alles</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3Z"/></svg>
-      <div><strong>Ein Ansprechpartner</strong><span>Kein Callcenter</span></div>
+    <div class="stat-big">
+      <strong>0 €</strong>
+      <span>Kosten für Anfrage und Angebot</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
-      <div><strong>Digitaler Wechsel</strong><span>Schnell und sauber</span></div>
+    <div class="stat-big">
+      <strong>4–6</strong>
+      <span>Wochen typische Wechseldauer</span>
     </div>
   </div>
-</div>
+</section>
 
 <section class="section" id="vorteile">
   <div class="container">
@@ -153,10 +165,19 @@
         <p>Grundpreis, Arbeitspreis, Laufzeit und Preisgleitklausel stehen im Vertrag — lesbar, ohne Kleingedrucktes.</p>
       </article>
     </div>
+
+    <div class="loss-callout reveal" data-example-kwh="45000">
+      <div>
+        <span class="eyebrow">Beispielrechnung</span>
+        <h3>45.000 kWh: Durchschnitt <s id="ex-ref">–</s>, E1 <span class="grad" id="ex-price">–</span>.</h3>
+        <p>Jeder Monat mit dem alten Tarif ist bezahltes Geld. Rund <strong id="ex-save">–</strong> pro Jahr bleiben bei E1 im Betrieb.</p>
+      </div>
+      <a class="btn btn-primary" href="#rechner">Gewerbepreis berechnen</a>
+    </div>
   </div>
 </section>
 
-<section class="section" id="ablauf">
+<section class="section section-tight" id="ablauf">
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Ablauf</span>
@@ -167,18 +188,48 @@
       <div class="step reveal">
         <div class="step-num">SCHRITT 01</div>
         <h3>Daten erfassen</h3>
-        <p>Firma, Standorte, Jahresverbrauch, aktuelle Anbieter. Je genauer die Angaben, desto besser das Angebot.</p>
+        <p>Firma, Standorte, Jahresverbrauch, aktueller Anbieter. Je genauer die Angaben, desto besser das Angebot.</p>
+        <span class="step-micro">2 Minuten, keine Zahlungsdaten.</span>
       </div>
       <div class="step reveal">
         <div class="step-num">SCHRITT 02</div>
         <h3>Angebot erhalten</h3>
         <p>Wir prüfen Zählpunkte und Netzentgelte und melden uns mit einem verbindlichen Angebot inklusive Laufzeit.</p>
+        <span class="step-micro">Antwort innerhalb eines Werktags.</span>
       </div>
       <div class="step reveal">
         <div class="step-num">SCHRITT 03</div>
         <h3>Wechsel starten</h3>
         <p>Nach deiner Bestätigung übernehmen wir Kündigung, Anmeldung und Terminierung beim Netzbetreiber.</p>
+        <span class="step-micro">Keine Versorgungslücke.</span>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tight" id="risiko">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Kein Risiko</span>
+      <h2>Du entscheidest nach Zahlen.</h2>
+      <p>Erst prüfen, dann bestätigen. Bis dahin kostet dich der Wechsel nichts.</p>
+    </div>
+    <div class="guarantees">
+      <article class="guarantee reveal">
+        <div class="guarantee-num">0 €</div>
+        <h3>Anfrage und Angebot</h3>
+        <p>Keine Kosten, keine Zahlungsdaten, keine versteckten Gebühren. Das Angebot ist unverbindlich.</p>
+      </article>
+      <article class="guarantee reveal">
+        <div class="guarantee-num">0</div>
+        <h3>Versorgungslücken</h3>
+        <p>Der Lieferantenwechsel unterbricht die Versorgung nicht. Der Betrieb läuft weiter.</p>
+      </article>
+      <article class="guarantee reveal">
+        <div class="guarantee-num">1</div>
+        <h3>Freigabe durch dich</h3>
+        <p>Wir kündigen nichts ohne deine ausdrückliche Bestätigung. Du siehst Laufzeit und Termin vorher.</p>
+      </article>
     </div>
   </div>
 </section>
@@ -211,122 +262,182 @@
         <summary>Was passiert bei einem Umzug oder Standortwechsel?</summary>
         <div class="faq-body">Der Vertrag wird auf den neuen Zählpunkt übertragen, sofern er im selben Netzgebiet liegt. Bei mehreren Netzen prüfen wir die Konditionen je Zählpunkt.</div>
       </details>
+      <details class="faq-item reveal">
+        <summary>Wie schnell kommt das Angebot?</summary>
+        <div class="faq-body">In der Regel innerhalb eines Werktags. Bei mehreren Zählpunkten oder fehlendem Lastprofil kann die Prüfung beim Netzbetreiber etwas länger dauern — wir melden uns mit einem Zwischenstand.</div>
+      </details>
     </div>
   </div>
 </section>
 
 <section class="section" id="anfrage">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Gewerbeanfrage</span>
-      <h2>Angebot für deinen Betrieb.</h2>
-      <p>Je mehr Angaben, desto konkreter das Angebot. Pflichtfelder sind minimal gehalten.</p>
-    </div>
-    <form id="lead-form" class="form-wrap reveal" data-typ="gewerbe" novalidate>
-      <div class="form-grid">
-        <div class="field">
-          <label for="f-produkt">Ich interessiere mich für</label>
-          <select id="f-produkt" name="produkt">
-            <option value="strom">Strom</option>
-            <option value="gas">Gas</option>
-          </select>
+    <div class="anfrage-grid">
+      <div class="anfrage-copy reveal">
+        <span class="eyebrow">Gewerbeanfrage</span>
+        <h2>Angebot für deinen Betrieb.</h2>
+        <p>Schritt 1 ist dein Betrieb, Schritt 2 sind deine Kontaktdaten. Je genauer die Angaben, desto konkreter das Angebot.</p>
+        <ul class="check-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mehrere Zählpunkte möglich</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Antwort innerhalb eines Werktags</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Angebot unverbindlich</li>
+        </ul>
+        <div class="switch-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          <div>
+            <strong>Nächster möglicher Wechsel</strong>
+            <span data-switch-date>–</span>
+          </div>
         </div>
-        <div class="field">
-          <label for="f-anrede">Anrede</label>
-          <select id="f-anrede" name="anrede">
-            <option value="">Keine Angabe</option>
-            <option>Herr</option>
-            <option>Frau</option>
-            <option>Divers</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f-vorname">Vorname</label>
-          <input id="f-vorname" name="vorname" autocomplete="given-name" required>
-          <span class="err" data-error-for="vorname"></span>
-        </div>
-        <div class="field">
-          <label for="f-nachname">Nachname</label>
-          <input id="f-nachname" name="nachname" autocomplete="family-name" required>
-          <span class="err" data-error-for="nachname"></span>
-        </div>
-        <div class="field">
-          <label for="f-firma">Firma</label>
-          <input id="f-firma" name="firma" autocomplete="organization" required>
-          <span class="err" data-error-for="firma"></span>
-        </div>
-        <div class="field">
-          <label for="f-ustid">USt-IdNr. (optional)</label>
-          <input id="f-ustid" name="ustid" autocomplete="off">
-          <span class="err" data-error-for="ustid"></span>
-        </div>
-        <div class="field">
-          <label for="f-email">E-Mail</label>
-          <input id="f-email" name="email" type="email" autocomplete="email" required>
-          <span class="err" data-error-for="email"></span>
-        </div>
-        <div class="field">
-          <label for="f-telefon">Telefon</label>
-          <input id="f-telefon" name="telefon" type="tel" autocomplete="tel">
-          <span class="err" data-error-for="telefon"></span>
-        </div>
-        <div class="field">
-          <label for="f-plz">PLZ</label>
-          <input id="f-plz" name="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" required>
-          <span class="err" data-error-for="plz"></span>
-        </div>
-        <div class="field">
-          <label for="f-ort">Ort</label>
-          <input id="f-ort" name="ort" autocomplete="address-level2">
-          <span class="err" data-error-for="ort"></span>
-        </div>
-        <div class="field">
-          <label for="f-strasse">Straße</label>
-          <input id="f-strasse" name="strasse" autocomplete="address-line1">
-          <span class="err" data-error-for="strasse"></span>
-        </div>
-        <div class="field">
-          <label for="f-hausnummer">Hausnummer</label>
-          <input id="f-hausnummer" name="hausnummer" autocomplete="address-line2">
-          <span class="err" data-error-for="hausnummer"></span>
-        </div>
-        <div class="field">
-          <label for="f-verbrauch">Jahresverbrauch (kWh)</label>
-          <input id="f-verbrauch" name="verbrauch_kwh" inputmode="numeric" placeholder="z. B. 45000">
-          <span class="err" data-error-for="verbrauch_kwh"></span>
-        </div>
-        <div class="field">
-          <label for="f-standorte">Anzahl Standorte / Zählpunkte</label>
-          <input id="f-standorte" name="anzahl_standorte" inputmode="numeric" placeholder="z. B. 3">
-          <span class="err" data-error-for="anzahl_standorte"></span>
-        </div>
-        <div class="field full">
-          <label for="f-anbieter">Aktueller Anbieter (optional)</label>
-          <input id="f-anbieter" name="aktueller_anbieter">
-          <span class="err" data-error-for="aktueller_anbieter"></span>
-        </div>
-        <div class="field full">
-          <label for="f-nachricht">Nachricht (optional)</label>
-          <textarea id="f-nachricht" name="nachricht" rows="3" placeholder="Zählpunktnummern, Lastprofil, Wunschtermin …"></textarea>
-          <span class="err" data-error-for="nachricht"></span>
-        </div>
-        <div class="hp" aria-hidden="true">
-          <label for="f-website">Website</label>
-          <input id="f-website" name="website" tabindex="-1" autocomplete="off">
-        </div>
-        <label class="check">
-          <input type="checkbox" name="consent">
-          <span>Ich stimme zu, dass E1 EnergyOne meine Angaben zur Bearbeitung der Gewerbeanfrage verarbeitet. Die <a href="/datenschutz.html">Datenschutzerklärung</a> habe ich gelesen.</span>
-        </label>
-        <span class="err" data-error-for="consent"></span>
       </div>
-      <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
-      <button class="btn btn-primary btn-block" type="submit">Gewerbeanfrage absenden</button>
-    </form>
+
+      <form id="lead-form" class="form-wrap reveal" data-typ="gewerbe" novalidate>
+        <div class="steps-indicator" data-active="1">
+          <div class="step-dot is-active" data-step-dot="1"><span>1</span><small>Betrieb</small></div>
+          <div class="step-line"><span></span></div>
+          <div class="step-dot" data-step-dot="2"><span>2</span><small>Kontakt</small></div>
+        </div>
+        <p class="step-caption" id="step-caption">Schritt 1 von 2 · Dein Betrieb</p>
+
+        <fieldset class="form-step" data-step="1">
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-produkt">Ich interessiere mich für</label>
+              <select id="f-produkt" name="produkt">
+                <option value="strom">Strom</option>
+                <option value="gas">Gas</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-firma">Firma</label>
+              <input id="f-firma" name="firma" autocomplete="organization" required>
+              <span class="err" data-error-for="firma"></span>
+            </div>
+            <div class="field">
+              <label for="f-plz">PLZ</label>
+              <input id="f-plz" name="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="10115" required>
+              <span class="err" data-error-for="plz"></span>
+            </div>
+            <div class="field">
+              <label for="f-verbrauch">Jahresverbrauch (kWh)</label>
+              <input id="f-verbrauch" name="verbrauch_kwh" inputmode="numeric" placeholder="z. B. 45000">
+              <span class="err" data-error-for="verbrauch_kwh"></span>
+            </div>
+            <div class="field">
+              <label for="f-standorte">Anzahl Standorte / Zählpunkte</label>
+              <input id="f-standorte" name="anzahl_standorte" inputmode="numeric" placeholder="z. B. 3">
+              <span class="err" data-error-for="anzahl_standorte"></span>
+            </div>
+            <div class="field">
+              <label for="f-anbieter">Aktueller Anbieter (optional)</label>
+              <input id="f-anbieter" name="aktueller_anbieter" placeholder="z. B. Stadtwerke">
+              <span class="err" data-error-for="aktueller_anbieter"></span>
+            </div>
+            <div class="upload-field">
+              <label class="upload" for="f-rechnung">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+                <span>
+                  <strong>Letzte Rechnung als PDF</strong>
+                  <small>Optional &middot; max. 8 MB &middot; wir &uuml;bernehmen Z&auml;hlernummer und Verbrauch</small>
+                </span>
+                <input id="f-rechnung" type="file" accept="application/pdf,.pdf" hidden>
+              </label>
+              <div class="upload-status" id="upload-status" role="status" aria-live="polite"></div>
+              <input type="hidden" name="upload_id" id="f-upload-id" value="">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="step-next">Weiter zu deinen Daten</button>
+          <p class="micro center">Kostenlos und unverbindlich. Keine Zahlungsdaten.</p>
+        </fieldset>
+
+        <fieldset class="form-step" data-step="2" hidden>
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-anrede">Anrede</label>
+              <select id="f-anrede" name="anrede">
+                <option value="">Keine Angabe</option>
+                <option>Herr</option>
+                <option>Frau</option>
+                <option>Divers</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-vorname">Vorname</label>
+              <input id="f-vorname" name="vorname" autocomplete="given-name" required>
+              <span class="err" data-error-for="vorname"></span>
+            </div>
+            <div class="field">
+              <label for="f-nachname">Nachname</label>
+              <input id="f-nachname" name="nachname" autocomplete="family-name" required>
+              <span class="err" data-error-for="nachname"></span>
+            </div>
+            <div class="field">
+              <label for="f-email">E-Mail</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required>
+              <span class="err" data-error-for="email"></span>
+            </div>
+            <div class="field">
+              <label for="f-telefon">Telefon</label>
+              <input id="f-telefon" name="telefon" type="tel" autocomplete="tel">
+              <span class="err" data-error-for="telefon"></span>
+            </div>
+            <div class="field">
+              <label for="f-ustid">USt-IdNr. (optional)</label>
+              <input id="f-ustid" name="ustid" autocomplete="off">
+              <span class="err" data-error-for="ustid"></span>
+            </div>
+            <div class="field">
+              <label for="f-ort">Ort</label>
+              <input id="f-ort" name="ort" autocomplete="address-level2">
+              <span class="err" data-error-for="ort"></span>
+            </div>
+            <div class="field">
+              <label for="f-strasse">Straße</label>
+              <input id="f-strasse" name="strasse" autocomplete="address-line1">
+              <span class="err" data-error-for="strasse"></span>
+            </div>
+            <div class="field">
+              <label for="f-hausnummer">Hausnummer</label>
+              <input id="f-hausnummer" name="hausnummer" autocomplete="address-line2">
+              <span class="err" data-error-for="hausnummer"></span>
+            </div>
+            <div class="field full">
+              <label for="f-nachricht">Nachricht (optional)</label>
+              <textarea id="f-nachricht" name="nachricht" rows="3" placeholder="Zählpunktnummern, Lastprofil, Wunschtermin …"></textarea>
+              <span class="err" data-error-for="nachricht"></span>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="f-website">Website</label>
+              <input id="f-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <label class="check">
+              <input type="checkbox" name="consent">
+              <span>Ich stimme zu, dass E1 Direktvertrieb meine Angaben zur Bearbeitung der Gewerbeanfrage verarbeitet. Die <a href="/datenschutz.html">Datenschutzerklärung</a> habe ich gelesen.</span>
+            </label>
+            <span class="err" data-error-for="consent"></span>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="step-back">Zurück</button>
+            <button type="submit" class="btn btn-primary">Gewerbeangebot anfordern</button>
+          </div>
+          <p class="micro center">Wir nutzen deine Daten nur für diese Anfrage. Kein Newsletter. Keine Weitergabe.</p>
+        </fieldset>
+
+        <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
   </div>
 </section>
 
 </main>
+
+<div class="sticky-cta" id="sticky-cta">
+  <div>
+    <strong>Gewerbepreis in 20 Sekunden</strong>
+    <span>Kostenlos &amp; unverbindlich</span>
+  </div>
+  <a class="btn btn-primary btn-sm" href="#rechner">Preis berechnen</a>
+</div>
 
 <footer>
   <div class="container">
@@ -363,11 +474,11 @@
     </div>
     <div class="footer-bottom">
       <span>© <span data-year>2026</span> E1 EnergyOne · E1 Direktvertrieb</span>
-      <span>Preise sind Beispielwerte, bis die finalen Tarifblätter hinterlegt sind.</span>
+      <span>Preisangaben sind Beispielwerte, bis die finalen Tarifblätter hinterlegt sind.</span>
     </div>
   </div>
 </footer>
 
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=2"></script>
 </body>
 </html>

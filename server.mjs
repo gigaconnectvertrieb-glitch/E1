@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import Busboy from 'busboy';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -39,7 +40,8 @@ const LEAD_COLUMNS = [
   'created_at', 'typ', 'produkt', 'anrede', 'vorname', 'nachname', 'firma',
   'ustid', 'email', 'telefon', 'plz', 'ort', 'strasse', 'hausnummer',
   'verbrauch_kwh', 'anzahl_standorte', 'aktueller_anbieter', 'nachricht',
-  'kalkulation_json', 'status', 'notiz', 'quelle', 'ip_hash', 'user_agent'
+  'kalkulation_json', 'status', 'notiz', 'quelle', 'ip_hash', 'user_agent',
+  'upload_id', 'upload_name'
 ];
 
 const CREATE_SQLITE = `
@@ -68,7 +70,9 @@ const CREATE_SQLITE = `
     notiz TEXT,
     quelle TEXT,
     ip_hash TEXT,
-    user_agent TEXT
+    user_agent TEXT,
+    upload_id TEXT,
+    upload_name TEXT
   )
 `;
 
@@ -98,7 +102,33 @@ const CREATE_PG = `
     notiz TEXT,
     quelle TEXT,
     ip_hash TEXT,
-    user_agent TEXT
+    user_agent TEXT,
+    upload_id TEXT,
+    upload_name TEXT
+  )
+`;
+
+const CREATE_UPLOADS_SQLITE = `
+  CREATE TABLE IF NOT EXISTS uploads (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    name TEXT,
+    mime TEXT,
+    size INTEGER,
+    data BLOB NOT NULL,
+    ip_hash TEXT
+  )
+`;
+
+const CREATE_UPLOADS_PG = `
+  CREATE TABLE IF NOT EXISTS uploads (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    name TEXT,
+    mime TEXT,
+    size INTEGER,
+    data BYTEA NOT NULL,
+    ip_hash TEXT
   )
 `;
 
@@ -127,7 +157,9 @@ function rowValues(value, kalkulation, meta) {
     null,
     value.quelle,
     meta.ipHash,
-    meta.userAgent
+    meta.userAgent,
+    meta.uploadId || null,
+    meta.uploadName || null
   ];
 }
 
@@ -143,6 +175,9 @@ async function createStore() {
       max: 5
     });
     await pool.query(CREATE_PG);
+    await pool.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS upload_id TEXT');
+    await pool.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS upload_name TEXT');
+    await pool.query(CREATE_UPLOADS_PG);
     await pool.query('CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC)');
 
     return {
@@ -202,6 +237,20 @@ async function createStore() {
         const res = await pool.query('SELECT * FROM leads ORDER BY id DESC');
         return res.rows;
       },
+      async insertUpload(upload) {
+        await pool.query(
+          'INSERT INTO uploads (id, created_at, name, mime, size, data, ip_hash) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+          [upload.id, upload.createdAt, upload.name, upload.mime, upload.size, upload.data, upload.ipHash]
+        );
+      },
+      async getUpload(id) {
+        const res = await pool.query('SELECT * FROM uploads WHERE id = $1', [id]);
+        return res.rows[0] || null;
+      },
+      async getUploadMeta(id) {
+        const res = await pool.query('SELECT id, name, size, mime FROM uploads WHERE id = $1', [id]);
+        return res.rows[0] || null;
+      },
       async close() {
         await pool.end();
       }
@@ -212,6 +261,10 @@ async function createStore() {
   const db = new DatabaseSync(path.join(DATA_DIR, 'leads.db'));
   db.exec('PRAGMA journal_mode = WAL');
   db.exec(CREATE_SQLITE);
+  const leadCols = db.prepare('PRAGMA table_info(leads)').all().map((r) => r.name);
+  if (!leadCols.includes('upload_id')) db.exec('ALTER TABLE leads ADD COLUMN upload_id TEXT');
+  if (!leadCols.includes('upload_name')) db.exec('ALTER TABLE leads ADD COLUMN upload_name TEXT');
+  db.exec(CREATE_UPLOADS_SQLITE);
   db.exec('CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC)');
 
   const insertSql =
@@ -264,6 +317,17 @@ async function createStore() {
     },
     async all() {
       return db.prepare('SELECT * FROM leads ORDER BY id DESC').all();
+    },
+    async insertUpload(upload) {
+      db.prepare(
+        'INSERT INTO uploads (id, created_at, name, mime, size, data, ip_hash) VALUES (?,?,?,?,?,?,?)'
+      ).run(upload.id, upload.createdAt, upload.name, upload.mime, upload.size, upload.data, upload.ipHash);
+    },
+    async getUpload(id) {
+      return db.prepare('SELECT * FROM uploads WHERE id = ?').get(id) || null;
+    },
+    async getUploadMeta(id) {
+      return db.prepare('SELECT id, name, size, mime FROM uploads WHERE id = ?').get(id) || null;
     },
     async close() {
       db.close();
@@ -336,6 +400,45 @@ function readJson(req, limit = 64 * 1024) {
     });
     req.on('error', reject);
   });
+}
+
+function parseMultipart(req, maxFileSize) {
+  return new Promise((resolve, reject) => {
+    let bb;
+    try {
+      bb = Busboy({ headers: req.headers, limits: { fileSize: maxFileSize, files: 1, fields: 2 } });
+    } catch {
+      return reject(Object.assign(new Error('invalid_multipart'), { status: 400 }));
+    }
+    let fileData = null;
+    let fileName = '';
+    let mimeType = '';
+    let truncated = false;
+    bb.on('file', (name, stream, info) => {
+      if (name !== 'file') {
+        stream.resume();
+        return;
+      }
+      fileName = info.filename || '';
+      mimeType = info.mimeType || '';
+      const chunks = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('limit', () => { truncated = true; });
+      stream.on('end', () => { fileData = Buffer.concat(chunks); });
+    });
+    bb.on('error', () => reject(Object.assign(new Error('multipart_error'), { status: 400 })));
+    bb.on('close', () => resolve({ fileData, fileName, mimeType, truncated }));
+    req.pipe(bb);
+  });
+}
+
+function headerFileName(name) {
+  const base = String(name || 'rechnung.pdf').replace(/[^A-Za-z0-9._-]/g, '_').slice(0, 120);
+  return /\.pdf$/i.test(base) ? base : base + '.pdf';
+}
+
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 }
 
 function clientIp(req) {
@@ -500,6 +603,52 @@ async function handleApi(req, res, url, pathname) {
     return json(res, 200, { ok: true, tariffs });
   }
 
+  if (pathname === '/api/uploads' && req.method === 'POST') {
+    if (!rateLimit('upload:' + clientIp(req), 10, 60 * 60 * 1000)) {
+      return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
+    }
+    let parsed;
+    try {
+      parsed = await parseMultipart(req, 8 * 1024 * 1024);
+    } catch (err) {
+      return json(res, err.status || 400, { ok: false, error: err.message });
+    }
+    if (parsed.truncated) return json(res, 413, { ok: false, error: 'datei_zu_gross' });
+    if (!parsed.fileData || !parsed.fileData.length) {
+      return json(res, 400, { ok: false, error: 'keine_datei' });
+    }
+    if (parsed.fileData.subarray(0, 5).toString('latin1') !== '%PDF-') {
+      return json(res, 400, { ok: false, error: 'kein_pdf' });
+    }
+    const uploadId = crypto.randomUUID();
+    const uploadName = headerFileName(parsed.fileName);
+    await store.insertUpload({
+      id: uploadId,
+      createdAt: new Date().toISOString(),
+      name: uploadName,
+      mime: 'application/pdf',
+      size: parsed.fileData.length,
+      data: parsed.fileData,
+      ipHash: ipHash(req)
+    });
+    return json(res, 201, { ok: true, id: uploadId, name: uploadName, size: parsed.fileData.length });
+  }
+
+  const uploadMatch = pathname.match(/^\/api\/uploads\/([0-9a-f-]{36})$/i);
+  if (uploadMatch && req.method === 'GET') {
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    const row = await store.getUpload(uploadMatch[1]);
+    if (!row) return json(res, 404, { ok: false, error: 'not_found' });
+    const buffer = Buffer.isBuffer(row.data) ? row.data : Buffer.from(row.data);
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Length': buffer.length,
+      'Content-Disposition': 'inline; filename="' + headerFileName(row.name) + '"',
+      'Cache-Control': 'no-store'
+    });
+    return res.end(buffer);
+  }
+
   if (pathname === '/api/leads' && req.method === 'POST') {
     if (!rateLimit('lead:' + clientIp(req), 5, 10 * 60 * 1000)) {
       return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
@@ -518,10 +667,19 @@ async function handleApi(req, res, url, pathname) {
       return json(res, 400, { ok: false, errors });
     }
     const kalkulation = calcKalkulation(value.produkt, value.verbrauch_kwh);
+
+    let upload = null;
+    const uploadId = asString(body.upload_id, 36);
+    if (isUuid(uploadId)) {
+      upload = await store.getUploadMeta(uploadId);
+    }
+
     const id = await store.insert(
       rowValues(value, kalkulation, {
         ipHash: ipHash(req),
-        userAgent: asString(req.headers['user-agent'], 300)
+        userAgent: asString(req.headers['user-agent'], 300),
+        uploadId: upload ? upload.id : null,
+        uploadName: upload ? upload.name : null
       })
     );
 
@@ -529,7 +687,13 @@ async function handleApi(req, res, url, pathname) {
       fetch(LEAD_WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'lead.created', id, ...value, kalkulation }),
+        body: JSON.stringify({
+          event: 'lead.created',
+          id,
+          ...value,
+          kalkulation,
+          upload: upload ? { id: upload.id, name: upload.name } : null
+        }),
         signal: AbortSignal.timeout(4000)
       }).catch((err) => console.error('webhook:', err.message));
     }
@@ -595,7 +759,8 @@ async function handleApi(req, res, url, pathname) {
       'id', 'created_at', 'typ', 'produkt', 'anrede', 'vorname', 'nachname',
       'firma', 'ustid', 'email', 'telefon', 'plz', 'ort', 'strasse',
       'hausnummer', 'verbrauch_kwh', 'anzahl_standorte', 'aktueller_anbieter',
-      'nachricht', 'kalkulation_json', 'status', 'notiz', 'quelle', 'user_agent'
+      'nachricht', 'kalkulation_json', 'status', 'notiz', 'quelle', 'user_agent',
+      'upload_id', 'upload_name'
     ];
     const cell = (v) => {
       const s = v === null || v === undefined ? '' : String(v);

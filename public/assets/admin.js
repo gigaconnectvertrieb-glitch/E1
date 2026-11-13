@@ -126,6 +126,12 @@
         firm.textContent = lead.firma;
         nameCell.appendChild(firm);
       }
+      if (lead.upload_id) {
+        var tag = document.createElement('span');
+        tag.className = 'pdf-tag';
+        tag.textContent = 'PDF';
+        nameCell.appendChild(tag);
+      }
       tr.appendChild(nameCell);
 
       var contact = document.createElement('td');
@@ -218,6 +224,23 @@
     pairs.forEach(function (p) {
       dialogDetails.appendChild(detail(p[0], p[1]));
     });
+
+    if (lead.upload_id) {
+      var uploadWrap = document.createElement('div');
+      uploadWrap.className = 'detail';
+      var uploadLabel = document.createElement('span');
+      uploadLabel.textContent = 'Rechnung';
+      var uploadValue = document.createElement('div');
+      var uploadLink = document.createElement('a');
+      uploadLink.href = '/api/uploads/' + encodeURIComponent(lead.upload_id);
+      uploadLink.target = '_blank';
+      uploadLink.rel = 'noopener';
+      uploadLink.textContent = lead.upload_name || 'PDF öffnen';
+      uploadValue.appendChild(uploadLink);
+      uploadWrap.appendChild(uploadLabel);
+      uploadWrap.appendChild(uploadValue);
+      dialogDetails.appendChild(uploadWrap);
+    }
 
     dialogNote.value = lead.notiz || '';
     dialogStatusSel.value = lead.status || 'neu';

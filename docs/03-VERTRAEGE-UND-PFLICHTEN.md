@@ -74,16 +74,14 @@ Die Plattform erzeugt Leads. Auch das ist reguliert.
 
 **Speicherdauer.** Leads ohne Vertrag nach angemessener Frist löschen (z. B. 6 Monate). Vertragsdaten unterliegen handels- und steuerrechtlichen Aufbewahrungsfristen.
 
-## Was in den Vorlagen noch fehlt (FILL)
+## Was in den Vorlagen noch offen ist
 
-- Firmenname, Rechtsform, Anschrift, Vertretungsberechtigte
-- USt-IdNr., Handelsregister
-- Telefon, E-Mail, verantwortliche Person nach § 18 MStV
-- Datenschutzbeauftragter (falls bestellt)
+- Anschrift, Telefon und E-Mail (Impressum, AGB, Datenschutz, Widerruf)
+- USt-IdNr., falls vorhanden
+- Datenschutzbeauftragter, falls bestellt
 - Hosting-, E-Mail- und CRM-Dienstleister in der Datenschutzerklärung
-- Laufzeit, Kündigungsfrist, Zahlungsfrist, Gerichtsstand in den AGB
 - Schlichtungsstelle und ggf. BNetzA-Aktenzeichen
-- Datum des Stands
+- Freigabe der AGB durch eine rechtliche Prüfung
 
 ## Checkliste vor dem ersten Vertrag
 

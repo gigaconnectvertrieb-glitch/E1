@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>E1 EnergyOne — Strom &amp; Gas direkt. Ohne Umwege.</title>
-  <meta name="description" content="E1 EnergyOne / E1 Direktvertrieb: Strom und Gas für Privat- und Gewerbekunden. Preis in 20 Sekunden berechnen, unverbindlich anfragen, Wechsel digital abwickeln.">
-  <meta property="og:title" content="E1 EnergyOne — Strom &amp; Gas direkt">
-  <meta property="og:description" content="Ein Ansprechpartner, digitale Abwicklung, transparente Preise. Jetzt Preis berechnen.">
+  <title>E1 EnergyOne — Strom &amp; Gas günstiger. Ohne Risiko.</title>
+  <meta name="description" content="E1 Direktvertrieb: Strom und Gas für Privat- und Gewerbekunden. Preis in 20 Sekunden berechnen, unverbindlich anfragen, Wechsel inklusive Kündigung und Netzbetreiber-Anmeldung.">
+  <meta property="og:title" content="E1 EnergyOne — Strom &amp; Gas günstiger. Ohne Risiko.">
+  <meta property="og:description" content="Ein Ansprechpartner, digitale Abwicklung, keine Versorgungslücke. Jetzt Preis berechnen.">
   <meta property="og:type" content="website">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/styles.css?v=2">
 </head>
 <body>
 
@@ -23,11 +23,11 @@
       <span>E1<small>EnergyOne</small></span>
     </a>
     <nav class="nav-links" aria-label="Hauptnavigation">
-      <a href="#rechner">Strom &amp; Gas</a>
+      <a href="#rechner">Preisrechner</a>
       <a href="#ablauf">Ablauf</a>
+      <a href="#vergleich">Vergleich</a>
       <a href="/business.html">Gewerbe</a>
       <a href="#faq">FAQ</a>
-      <a href="#anfrage">Anfrage</a>
     </nav>
     <div class="nav-cta">
       <a class="btn btn-primary btn-sm" href="#anfrage">Angebot sichern</a>
@@ -40,26 +40,33 @@
 
 <main>
 
-<section class="hero">
+<section class="hero" id="rechner">
   <div class="container hero-grid">
-    <div>
-      <span class="eyebrow">E1 Direktvertrieb</span>
-      <h1>Strom &amp; Gas.<br>Direkt. <span class="grad">Ohne Umwege.</span></h1>
-      <p class="lead">E1 EnergyOne bündelt Strom- und Gasversorgung für Privat- und Gewerbekunden: ein Ansprechpartner, digitale Abwicklung, transparente Preise. Rechne in 20 Sekunden deinen Preis.</p>
+    <div class="hero-copy">
+      <span class="eyebrow">E1 Direktvertrieb · Strom &amp; Gas</span>
+      <h1>Weniger zahlen.<br><span class="grad">Ohne Risiko.</span></h1>
+      <p class="lead">E1 EnergyOne prüft deinen Tarif, kündigt den alten Vertrag und meldet dich beim Netzbetreiber an. Ein Ansprechpartner, ein klarer Preis, keine Versorgungslücke.</p>
       <ul class="hero-points">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Kostenlos &amp; unverbindlich</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Keine Versorgungslücke</li>
         <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Privat &amp; Gewerbe</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Digitaler Wechsel</li>
-        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Kein Papierkram</li>
       </ul>
+      <div class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        <span>Nächster möglicher Wechsel: <strong data-switch-date>–</strong></span>
+      </div>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="#anfrage">Jetzt anfragen</a>
-        <a class="btn btn-ghost" href="#ablauf">So funktioniert's</a>
+        <a class="btn btn-primary" href="#anfrage">Preis berechnen</a>
+        <a class="btn btn-ghost" href="#ablauf">So läuft der Wechsel</a>
       </div>
     </div>
 
     <div class="calc" id="calc" aria-label="Preisrechner">
       <div class="calc-head">
-        <h2>Dein Preis in 20 Sekunden</h2>
+        <div>
+          <span class="calc-kicker">Preisrechner</span>
+          <h2>Dein Preis. Sofort.</h2>
+        </div>
         <span class="live-dot">Live</span>
       </div>
       <div class="seg" role="group" aria-label="Energieart wählen">
@@ -86,77 +93,91 @@
         </div>
       </div>
       <div class="result">
-        <div class="result-label">Dein Preis pro Jahr</div>
+        <div class="result-anchor">
+          <span>Durchschnittspreis</span>
+          <s id="out-ref">–</s>
+        </div>
+        <div class="result-label">Dein Preis bei E1<span id="out-context"></span></div>
         <div class="result-top">
           <div class="result-price"><span id="out-jahr">–</span><small> € / Jahr</small></div>
           <div class="saving" id="out-saving">–</div>
         </div>
         <div class="result-rows">
           <div class="result-row"><span>entspricht pro Monat</span><strong id="out-monat">–</strong></div>
-          <div class="result-row"><span>Vergleich Durchschnittspreis</span><strong id="out-ref">–</strong></div>
+          <div class="result-row"><span>Ersparnis pro Jahr</span><strong id="out-sparen">–</strong></div>
         </div>
         <div class="calc-note">Unverbindliche Beispielrechnung auf Basis der hinterlegten E1-Tarife. Der finale Preis hängt von Netzgebiet, Zählertyp und Bonität ab.</div>
       </div>
-      <a class="btn btn-primary btn-block" href="#anfrage">Angebot anfordern</a>
+      <a class="btn btn-primary btn-block" href="#anfrage">Kostenloses Angebot anfordern</a>
+      <p class="micro center">Keine Zahlungsdaten. Kein Vertrag. Nur eine Anfrage.</p>
     </div>
   </div>
 </section>
 
-<div class="trust">
-  <div class="container trust-inner">
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6l-8-3Z"/></svg>
-      <div><strong>Ein Ansprechpartner</strong><span>Privat und Gewerbe</span></div>
+<section class="stats-band">
+  <div class="container stats-grid">
+    <div class="stat-big">
+      <strong>3</strong>
+      <span>Schritte bis zum neuen Tarif</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
-      <div><strong>Digitaler Wechsel</strong><span>Ohne Papierkram</span></div>
+    <div class="stat-big">
+      <strong>1</strong>
+      <span>Ansprechpartner für alles</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5"/></svg>
-      <div><strong>Privat &amp; Gewerbe</strong><span>Ein Tarif, zwei Welten</span></div>
+    <div class="stat-big">
+      <strong>0 €</strong>
+      <span>Kosten für Anfrage und Angebot</span>
     </div>
-    <div class="trust-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <div><strong>Transparente Preise</strong><span>Klare Rechnung</span></div>
+    <div class="stat-big">
+      <strong>4–6</strong>
+      <span>Wochen typische Wechseldauer</span>
     </div>
   </div>
-</div>
+</section>
 
 <section class="section" id="leistungen">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Was wir machen</span>
-      <h2>Energie, die zu dir passt.</h2>
-      <p>Ob Wohnung, Haus oder Betrieb: E1 EnergyOne liefert Strom und Gas mit klaren Konditionen — und übernimmt die Abwicklung.</p>
+      <span class="eyebrow">Der Unterschied</span>
+      <h2>Ein Wechsel, der sich nicht nach Risiko anfühlt.</h2>
+      <p>Die meisten Wechsel scheitern nicht am Preis, sondern an Unsicherheit: Aufwand, Risiko, unklare Kosten. E1 nimmt dir alle drei.</p>
     </div>
     <div class="cards">
       <article class="card reveal">
         <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <h3>Strom</h3>
-        <p>Für Haushalt und Betrieb. Faire Arbeitspreise, planbarer Grundpreis, Wechsel ohne Unterbrechung der Versorgung.</p>
+        <h3>Klarer Preis statt Lockangebot</h3>
+        <p>Grundpreis und Arbeitspreis stehen offen. Was im Angebot steht, steht später auch auf der Rechnung — ohne Nachverhandlung.</p>
       </article>
       <article class="card reveal">
         <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2s5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5C9 9 10 11 11 11c1.5 0 1.5-2 1-4-.4-1.6-.5-3 0-5Z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
         </div>
-        <h3>Gas</h3>
-        <p>Heizen mit Plan. Jahresverbrauch angeben, Preis erhalten, Rest erledigen wir — inklusive Anmeldung beim Netzbetreiber.</p>
+        <h3>Abwicklung statt Aufgabenliste</h3>
+        <p>Wir kündigen, melden beim Netzbetreiber an und bestätigen den Termin. Du musst nichts nachreichen, was wir selbst besorgen können.</p>
       </article>
       <article class="card reveal">
         <div class="card-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M9 10h.01M15 10h.01"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/></svg>
         </div>
-        <h3>Gewerbe</h3>
-        <p>Mehrere Zählpunkte, Lastprofile, Rahmenverträge. Ein Ansprechpartner für Standorte, Abrechnung und Wechsel.</p>
+        <h3>Ein Mensch statt Warteschleife</h3>
+        <p>Ein fester Ansprechpartner für Privat und Gewerbe. Antwort innerhalb eines Werktags — nicht nach drei Menüs und einer Wartemusik.</p>
       </article>
+    </div>
+
+    <div class="loss-callout reveal" data-example-kwh="2800">
+      <div>
+        <span class="eyebrow">Beispielrechnung</span>
+        <h3>2.800 kWh: Durchschnitt <s id="ex-ref">1.292 €</s>, E1 <span class="grad" id="ex-price">928 €</span>.</h3>
+        <p>Das sind rund <strong id="ex-save">364 €</strong> pro Jahr, die du behalten kannst. Ohne Wechsel passiert genau nichts — und der alte Tarif läuft weiter.</p>
+      </div>
+      <a class="btn btn-primary" href="#rechner">Eigenen Preis berechnen</a>
     </div>
   </div>
 </section>
 
-<section class="section" id="ablauf">
+<section class="section section-tight" id="ablauf">
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">Ablauf</span>
@@ -167,49 +188,108 @@
       <div class="step reveal">
         <div class="step-num">SCHRITT 01</div>
         <h3>Preis berechnen</h3>
-        <p>PLZ und Jahresverbrauch eingeben. Du siehst sofort deinen Preis und die mögliche Ersparnis.</p>
+        <p>PLZ und Jahresverbrauch reichen. Du siehst sofort deinen Preis und die Differenz zum Durchschnitt.</p>
+        <span class="step-micro">Dauert 20 Sekunden.</span>
       </div>
       <div class="step reveal">
         <div class="step-num">SCHRITT 02</div>
         <h3>Anfrage senden</h3>
-        <p>Kontaktdaten eintragen, absenden. Wir prüfen die Angaben und melden uns mit dem konkreten Angebot.</p>
+        <p>Zwei Minuten, keine Zahlungsdaten. Wir prüfen Zählpunkt und Laufzeit und melden uns mit dem konkreten Angebot.</p>
+        <span class="step-micro">Antwort innerhalb eines Werktags.</span>
       </div>
       <div class="step reveal">
         <div class="step-num">SCHRITT 03</div>
-        <h3>Wechsel läuft</h3>
-        <p>Du bestätigst, wir kümmern uns um Kündigung, Anmeldung und Termin. Deine Versorgung bleibt durchgehend gesichert.</p>
+        <h3>Wechsel starten</h3>
+        <p>Du bestätigst, wir kündigen und melden an. Die Versorgung läuft durchgehend weiter.</p>
+        <span class="step-micro">Du kannst jederzeit abbrechen.</span>
       </div>
     </div>
   </div>
 </section>
 
-<section class="section" id="zielgruppen">
+<section class="section" id="vergleich">
   <div class="container">
     <div class="section-head reveal">
-      <span class="eyebrow">Für wen</span>
-      <h2>Zwei Zielgruppen. Ein Anspruch.</h2>
-      <p>Privatkunden wollen Klarheit. Gewerbekunden wollen Verlässlichkeit. Beides bekommt denselben Ansprechpartner.</p>
+      <span class="eyebrow">Vergleich</span>
+      <h2>Wo E1 anders arbeitet.</h2>
+      <p>Kein Portal, kein Callcenter, kein Wechsel ohne Ansprechpartner. Der Unterschied liegt in der Abwicklung.</p>
     </div>
-    <div class="split">
-      <article class="split-card reveal">
-        <h3>Privatkunden</h3>
-        <p>Wohnung oder Haus, ein Zähler, ein klarer Tarif. Wir halten den Wechsel einfach und die Rechnung verständlich.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Strom und Gas für Haushalt</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Wechsel ohne Versorgungslücke</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Digital, ohne Papierkram</li>
-        </ul>
-        <a class="btn btn-primary" href="#anfrage">Privat anfragen</a>
+    <div class="compare-wrap reveal">
+      <table class="compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="col-e1">E1 Direktvertrieb</th>
+            <th>Vergleichsportal</th>
+            <th>Klassischer Anbieter</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Persönlicher Ansprechpartner</td>
+            <td class="col-e1"><span class="yes">✓</span></td>
+            <td><span class="no">meist nicht</span></td>
+            <td><span class="no">wechselnd</span></td>
+          </tr>
+          <tr>
+            <td>Kündigung beim Altanbieter</td>
+            <td class="col-e1"><span class="yes">✓</span></td>
+            <td><span class="no">nein</span></td>
+            <td><span class="no">teils</span></td>
+          </tr>
+          <tr>
+            <td>Anmeldung beim Netzbetreiber</td>
+            <td class="col-e1"><span class="yes">✓</span></td>
+            <td><span class="no">nein</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Strom &amp; Gas aus einer Hand</td>
+            <td class="col-e1"><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="no">teils</span></td>
+          </tr>
+          <tr>
+            <td>Betreuung nach Abschluss</td>
+            <td class="col-e1"><span class="yes">✓</span></td>
+            <td><span class="no">nein</span></td>
+            <td><span class="no">Callcenter</span></td>
+          </tr>
+          <tr>
+            <td>Kosten für die Anfrage</td>
+            <td class="col-e1"><span class="yes">0 €</span></td>
+            <td><span class="yes">0 €</span></td>
+            <td><span class="yes">0 €</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="compare-note">Struktureller Vergleich. Anbieter und Portale unterscheiden sich im Einzelfall.</p>
+  </div>
+</section>
+
+<section class="section section-tight" id="risiko">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Kein Risiko</span>
+      <h2>Du gehst kein Risiko. Wir auch nicht.</h2>
+      <p>Der Wechsel ist erst dann ein Wechsel, wenn du ihn bestätigst. Vorher kostet er dich nichts.</p>
+    </div>
+    <div class="guarantees">
+      <article class="guarantee reveal">
+        <div class="guarantee-num">0 €</div>
+        <h3>Anfrage und Angebot</h3>
+        <p>Rechner und Angebot kosten nichts. Keine Zahlungsdaten im Formular, keine versteckten Gebühren.</p>
       </article>
-      <article class="split-card highlight reveal">
-        <h3>Gewerbekunden</h3>
-        <p>Ein Standort oder zwanzig. Wir bündeln Zählpunkte, Lastprofile und Abrechnung unter einem Vertrag.</p>
-        <ul>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mehrere Zählpunkte bündeln</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Rahmenvertrag und Preisgleitklausel</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Persönlicher Ansprechpartner</li>
-        </ul>
-        <a class="btn btn-ghost" href="/business.html">Gewerbe anfragen</a>
+      <article class="guarantee reveal">
+        <div class="guarantee-num">0</div>
+        <h3>Versorgungslücken</h3>
+        <p>Der Wechsel ist ein Lieferantenwechsel, kein Anschlusswechsel. Der Zähler bleibt, das Licht brennt.</p>
+      </article>
+      <article class="guarantee reveal">
+        <div class="guarantee-num">1</div>
+        <h3>Entscheidung liegt bei dir</h3>
+        <p>Erst prüfen, dann bestätigen. Wir kündigen nichts ohne deine ausdrückliche Freigabe.</p>
       </article>
     </div>
   </div>
@@ -219,33 +299,41 @@
   <div class="container">
     <div class="section-head reveal">
       <span class="eyebrow">FAQ</span>
-      <h2>Was Kunden fragen.</h2>
-      <p>Die wichtigsten Punkte vor der Anfrage. Alles Weitere klären wir persönlich.</p>
+      <h2>Was vor dem Wechsel zählt.</h2>
+      <p>Die Fragen, die wirklich entscheiden — kurz und ohne Vertriebsprosa.</p>
     </div>
     <div class="faq narrow">
       <details class="faq-item reveal">
-        <summary>Wie läuft der Wechsel genau ab?</summary>
-        <div class="faq-body">Du sendest deine Anfrage. Wir prüfen Zählernummer, Verbrauch und Vertragsstatus, erstellen das Angebot und kündigen nach deiner Bestätigung den alten Vertrag. Die Anmeldung beim Netzbetreiber übernehmen wir. Die Versorgung wird nicht unterbrochen.</div>
+        <summary>Was kostet die Anfrage?</summary>
+        <div class="faq-body">Nichts. Preisrechner und Angebot sind kostenlos und unverbindlich. Kosten entstehen erst mit dem von dir bestätigten Versorgungsvertrag.</div>
       </details>
       <details class="faq-item reveal">
-        <summary>Was brauche ich für die Anfrage?</summary>
-        <div class="faq-body">Für die Ersteinschätzung reichen PLZ und Jahresverbrauch. Für ein verbindliches Angebot zusätzlich Name, Anschrift, Zählernummer und der aktuelle Anbieter. Die Zählernummer steht auf der letzten Rechnung.</div>
+        <summary>Muss ich meinen alten Vertrag selbst kündigen?</summary>
+        <div class="faq-body">Nein, auf deine Beauftragung übernehmen wir die Kündigung. Wir prüfen vorher Laufzeit und Kündigungsfrist und stimmen den Wechseltermin mit dem Netzbetreiber ab.</div>
       </details>
       <details class="faq-item reveal">
-        <summary>Kostet die Anfrage etwas?</summary>
-        <div class="faq-body">Nein. Die Preisrechnung und die Anfrage sind kostenlos und unverbindlich. Kosten entstehen erst mit dem von dir bestätigten Versorgungsvertrag.</div>
-      </details>
-      <details class="faq-item reveal">
-        <summary>Kann ich als Gewerbekunde wechseln?</summary>
-        <div class="faq-body">Ja. Für Gewerbekunden erfassen wir zusätzlich Firmendaten, Anzahl der Standorte und den Jahresverbrauch. Bei mehreren Zählpunkten bündeln wir die Verträge in einem Rahmenvertrag.</div>
+        <summary>Was, wenn mein Vertrag noch läuft?</summary>
+        <div class="faq-body">Dann wechseln wir zum Ende der Laufzeit. Wir nennen dir den frühestmöglichen Termin, bevor du irgendetwas bestätigst. Ein verfrühter Wechsel entsteht nicht.</div>
       </details>
       <details class="faq-item reveal">
         <summary>Wie lange dauert der Wechsel?</summary>
-        <div class="faq-body">In der Regel vier bis sechs Wochen, abhängig vom Netzbetreiber und deiner Vertragslaufzeit beim alten Anbieter. Den konkreten Termin bestätigen wir dir schriftlich.</div>
+        <div class="faq-body">In der Regel vier bis sechs Wochen ab vollständiger Anmeldung, abhängig von Netzbetreiber und Restlaufzeit. Die Versorgung wird nicht unterbrochen.</div>
       </details>
       <details class="faq-item reveal">
-        <summary>Was passiert mit meinem alten Vertrag?</summary>
-        <div class="faq-body">Wir kündigen ihn zum nächstmöglichen Termin, sofern du uns dazu beauftragst. Hast du eine Mindestlaufzeit, prüfen wir vorher, ob ein Wechsel zum Ende der Laufzeit sinnvoll ist.</div>
+        <summary>Bleibt mein Zähler?</summary>
+        <div class="faq-body">Ja. Beim Lieferantenwechsel bleibt die Messstelle unverändert. Es wird nichts umgebaut und niemand muss vor Ort sein.</div>
+      </details>
+      <details class="faq-item reveal">
+        <summary>Kann ich als Gewerbekunde wechseln?</summary>
+        <div class="faq-body">Ja. Für Betriebe bündeln wir mehrere Zählpunkte, prüfen Lastprofil und Netzebene und arbeiten mit Rahmenverträgen. Details auf der Gewerbe-Seite.</div>
+      </details>
+      <details class="faq-item reveal">
+        <summary>Was passiert mit meinen Daten?</summary>
+        <div class="faq-body">Wir nutzen sie ausschließlich zur Bearbeitung deiner Anfrage. Kein Newsletter, kein Verkauf, keine Weitergabe an Dritte ohne Rechtsgrundlage. Details in der Datenschutzerklärung.</div>
+      </details>
+      <details class="faq-item reveal">
+        <summary>Warum ist E1 günstiger?</summary>
+        <div class="faq-body">E1 arbeitet digital und ohne Filialnetz. Weniger Overhead bedeutet mehr Spielraum beim Arbeitspreis. Was übrig bleibt, steht transparent im Angebot.</div>
       </details>
     </div>
   </div>
@@ -253,101 +341,157 @@
 
 <section class="section" id="anfrage">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">Anfrage</span>
-      <h2>Jetzt Angebot sichern.</h2>
-      <p>Zwei Minuten, dann übernehmen wir. Deine Daten bleiben bei uns und werden nicht verkauft.</p>
-    </div>
-    <form id="lead-form" class="form-wrap reveal" data-typ="privat" novalidate>
-      <div class="form-grid">
-        <div class="field">
-          <label for="f-produkt">Ich interessiere mich für</label>
-          <select id="f-produkt" name="produkt">
-            <option value="strom">Strom</option>
-            <option value="gas">Gas</option>
-          </select>
+    <div class="anfrage-grid">
+      <div class="anfrage-copy reveal">
+        <span class="eyebrow">Anfrage</span>
+        <h2>Dein Preis. Dein Termin. Deine Entscheidung.</h2>
+        <p>Schritt 1 ist dein Tarif, Schritt 2 sind deine Kontaktdaten. Du siehst das Angebot, bevor du irgendetwas bestätigst.</p>
+        <ul class="check-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>2 Minuten, keine Zahlungsdaten</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Antwort innerhalb eines Werktags</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Keine Verpflichtung, kein Abo</li>
+        </ul>
+        <div class="switch-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          <div>
+            <strong>Nächster möglicher Wechsel</strong>
+            <span data-switch-date>–</span>
+          </div>
         </div>
-        <div class="field">
-          <label for="f-anrede">Anrede</label>
-          <select id="f-anrede" name="anrede">
-            <option value="">Keine Angabe</option>
-            <option>Herr</option>
-            <option>Frau</option>
-            <option>Divers</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="f-vorname">Vorname</label>
-          <input id="f-vorname" name="vorname" autocomplete="given-name" required>
-          <span class="err" data-error-for="vorname"></span>
-        </div>
-        <div class="field">
-          <label for="f-nachname">Nachname</label>
-          <input id="f-nachname" name="nachname" autocomplete="family-name" required>
-          <span class="err" data-error-for="nachname"></span>
-        </div>
-        <div class="field">
-          <label for="f-email">E-Mail</label>
-          <input id="f-email" name="email" type="email" autocomplete="email" required>
-          <span class="err" data-error-for="email"></span>
-        </div>
-        <div class="field">
-          <label for="f-telefon">Telefon (optional)</label>
-          <input id="f-telefon" name="telefon" type="tel" autocomplete="tel">
-          <span class="err" data-error-for="telefon"></span>
-        </div>
-        <div class="field">
-          <label for="f-plz">PLZ</label>
-          <input id="f-plz" name="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" required>
-          <span class="err" data-error-for="plz"></span>
-        </div>
-        <div class="field">
-          <label for="f-ort">Ort</label>
-          <input id="f-ort" name="ort" autocomplete="address-level2">
-          <span class="err" data-error-for="ort"></span>
-        </div>
-        <div class="field">
-          <label for="f-strasse">Straße</label>
-          <input id="f-strasse" name="strasse" autocomplete="address-line1">
-          <span class="err" data-error-for="strasse"></span>
-        </div>
-        <div class="field">
-          <label for="f-hausnummer">Hausnummer</label>
-          <input id="f-hausnummer" name="hausnummer" autocomplete="address-line2">
-          <span class="err" data-error-for="hausnummer"></span>
-        </div>
-        <div class="field">
-          <label for="f-verbrauch">Jahresverbrauch (kWh)</label>
-          <input id="f-verbrauch" name="verbrauch_kwh" inputmode="numeric" placeholder="z. B. 2800">
-          <span class="err" data-error-for="verbrauch_kwh"></span>
-        </div>
-        <div class="field">
-          <label for="f-anbieter">Aktueller Anbieter (optional)</label>
-          <input id="f-anbieter" name="aktueller_anbieter" placeholder="z. B. Stadtwerke">
-          <span class="err" data-error-for="aktueller_anbieter"></span>
-        </div>
-        <div class="field full">
-          <label for="f-nachricht">Nachricht (optional)</label>
-          <textarea id="f-nachricht" name="nachricht" rows="3" placeholder="Zählernummer, Wunschtermin, Besonderheiten …"></textarea>
-          <span class="err" data-error-for="nachricht"></span>
-        </div>
-        <div class="hp" aria-hidden="true">
-          <label for="f-website">Website</label>
-          <input id="f-website" name="website" tabindex="-1" autocomplete="off">
-        </div>
-        <label class="check">
-          <input type="checkbox" name="consent">
-          <span>Ich stimme zu, dass E1 EnergyOne meine Angaben zur Bearbeitung der Anfrage verarbeitet. Die <a href="/datenschutz.html">Datenschutzerklärung</a> habe ich gelesen.</span>
-        </label>
-        <span class="err" data-error-for="consent"></span>
       </div>
-      <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
-      <button class="btn btn-primary btn-block" type="submit">Anfrage absenden</button>
-    </form>
+
+      <form id="lead-form" class="form-wrap reveal" data-typ="privat" novalidate>
+        <div class="steps-indicator" data-active="1">
+          <div class="step-dot is-active" data-step-dot="1"><span>1</span><small>Tarif</small></div>
+          <div class="step-line"><span></span></div>
+          <div class="step-dot" data-step-dot="2"><span>2</span><small>Kontakt</small></div>
+        </div>
+        <p class="step-caption" id="step-caption">Schritt 1 von 2 · Dein Tarif</p>
+
+        <fieldset class="form-step" data-step="1">
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-produkt">Ich interessiere mich für</label>
+              <select id="f-produkt" name="produkt">
+                <option value="strom">Strom</option>
+                <option value="gas">Gas</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-plz">PLZ</label>
+              <input id="f-plz" name="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="10115" required>
+              <span class="err" data-error-for="plz"></span>
+            </div>
+            <div class="field">
+              <label for="f-verbrauch">Jahresverbrauch (kWh)</label>
+              <input id="f-verbrauch" name="verbrauch_kwh" inputmode="numeric" placeholder="z. B. 2800">
+              <span class="err" data-error-for="verbrauch_kwh"></span>
+            </div>
+            <div class="field">
+              <label for="f-anbieter">Aktueller Anbieter (optional)</label>
+              <input id="f-anbieter" name="aktueller_anbieter" placeholder="z. B. Stadtwerke">
+              <span class="err" data-error-for="aktueller_anbieter"></span>
+            </div>
+            <div class="upload-field">
+              <label class="upload" for="f-rechnung">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+                <span>
+                  <strong>Letzte Rechnung als PDF</strong>
+                  <small>Optional &middot; max. 8 MB &middot; wir &uuml;bernehmen Z&auml;hlernummer und Verbrauch</small>
+                </span>
+                <input id="f-rechnung" type="file" accept="application/pdf,.pdf" hidden>
+              </label>
+              <div class="upload-status" id="upload-status" role="status" aria-live="polite"></div>
+              <input type="hidden" name="upload_id" id="f-upload-id" value="">
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="step-next">Weiter zu deinen Daten</button>
+          <p class="micro center">Kostenlos und unverbindlich. Keine Zahlungsdaten.</p>
+        </fieldset>
+
+        <fieldset class="form-step" data-step="2" hidden>
+          <div class="form-grid">
+            <div class="field">
+              <label for="f-anrede">Anrede</label>
+              <select id="f-anrede" name="anrede">
+                <option value="">Keine Angabe</option>
+                <option>Herr</option>
+                <option>Frau</option>
+                <option>Divers</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-vorname">Vorname</label>
+              <input id="f-vorname" name="vorname" autocomplete="given-name" required>
+              <span class="err" data-error-for="vorname"></span>
+            </div>
+            <div class="field">
+              <label for="f-nachname">Nachname</label>
+              <input id="f-nachname" name="nachname" autocomplete="family-name" required>
+              <span class="err" data-error-for="nachname"></span>
+            </div>
+            <div class="field">
+              <label for="f-email">E-Mail</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required>
+              <span class="err" data-error-for="email"></span>
+            </div>
+            <div class="field">
+              <label for="f-telefon">Telefon (optional)</label>
+              <input id="f-telefon" name="telefon" type="tel" autocomplete="tel">
+              <span class="err" data-error-for="telefon"></span>
+            </div>
+            <div class="field">
+              <label for="f-ort">Ort</label>
+              <input id="f-ort" name="ort" autocomplete="address-level2">
+              <span class="err" data-error-for="ort"></span>
+            </div>
+            <div class="field">
+              <label for="f-strasse">Straße</label>
+              <input id="f-strasse" name="strasse" autocomplete="address-line1">
+              <span class="err" data-error-for="strasse"></span>
+            </div>
+            <div class="field">
+              <label for="f-hausnummer">Hausnummer</label>
+              <input id="f-hausnummer" name="hausnummer" autocomplete="address-line2">
+              <span class="err" data-error-for="hausnummer"></span>
+            </div>
+            <div class="field full">
+              <label for="f-nachricht">Nachricht (optional)</label>
+              <textarea id="f-nachricht" name="nachricht" rows="3" placeholder="Zählernummer, Wunschtermin, Besonderheiten …"></textarea>
+              <span class="err" data-error-for="nachricht"></span>
+            </div>
+            <div class="hp" aria-hidden="true">
+              <label for="f-website">Website</label>
+              <input id="f-website" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <label class="check">
+              <input type="checkbox" name="consent">
+              <span>Ich stimme zu, dass E1 Direktvertrieb meine Angaben zur Bearbeitung der Anfrage verarbeitet. Die <a href="/datenschutz.html">Datenschutzerklärung</a> habe ich gelesen.</span>
+            </label>
+            <span class="err" data-error-for="consent"></span>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-ghost" id="step-back">Zurück</button>
+            <button type="submit" class="btn btn-primary">Kostenloses Angebot anfordern</button>
+          </div>
+          <p class="micro center">Wir nutzen deine Daten nur für diese Anfrage. Kein Newsletter. Keine Weitergabe.</p>
+        </fieldset>
+
+        <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
   </div>
 </section>
 
 </main>
+
+<div class="sticky-cta" id="sticky-cta">
+  <div>
+    <strong>Dein Preis in 20 Sekunden</strong>
+    <span>Kostenlos &amp; unverbindlich</span>
+  </div>
+  <a class="btn btn-primary btn-sm" href="#rechner">Preis berechnen</a>
+</div>
 
 <footer>
   <div class="container">
@@ -384,11 +528,11 @@
     </div>
     <div class="footer-bottom">
       <span>© <span data-year>2026</span> E1 EnergyOne · E1 Direktvertrieb</span>
-      <span>Preise sind Beispielwerte, bis die finalen Tarifblätter hinterlegt sind.</span>
+      <span>Preisangaben sind Beispielwerte, bis die finalen Tarifblätter hinterlegt sind.</span>
     </div>
   </div>
 </footer>
 
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=2"></script>
 </body>
 </html>
