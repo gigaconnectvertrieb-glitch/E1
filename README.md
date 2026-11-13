@@ -58,6 +58,10 @@ Ohne `DATABASE_URL` läuft eine SQLite-Datei unter `data/leads.db`. Node **24+**
 3. Plan: Free. Health Check: `/healthz`.
 4. Env: `NODE_VERSION=24`, `HOST=0.0.0.0`, `E1_ADMIN_TOKEN=<zufällig>`.
 
+### Falls der Service auf Docker steht
+
+Der Fehler `failed to read dockerfile: open Dockerfile: no such file or directory` bedeutet: Render hat den Service als **Docker** angelegt. Das Repo enthält jetzt einen `Dockerfile` — ein Redeploy baut damit automatisch. Alternativ im Dashboard unter **Settings → Environment** auf `Node` stellen; dann gelten `npm install` und `node server.mjs`.
+
 ### Wichtig: Free-Disk ist ephemer
 
 Der Free-Plan hat keine persistente Platte. SQLite-Daten (Leads, Token) gehen bei jedem Deploy und Neustart verloren. Für echte Leads **Postgres** verwenden.
