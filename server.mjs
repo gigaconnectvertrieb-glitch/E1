@@ -5,6 +5,7 @@ import { readFile, writeFile, mkdir, stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import Busboy from 'busboy';
+import { createPortal } from './portal.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
@@ -132,6 +133,20 @@ const CREATE_UPLOADS_PG = `
   )
 `;
 
+const CREATE_SETTINGS_SQLITE = `
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  )
+`;
+
+const CREATE_SETTINGS_PG = `
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  )
+`;
+
 function rowValues(value, kalkulation, meta) {
   return [
     new Date().toISOString(),
@@ -178,6 +193,7 @@ async function createStore() {
     await pool.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS upload_id TEXT');
     await pool.query('ALTER TABLE leads ADD COLUMN IF NOT EXISTS upload_name TEXT');
     await pool.query(CREATE_UPLOADS_PG);
+    await pool.query(CREATE_SETTINGS_PG);
     await pool.query('CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC)');
 
     return {
@@ -251,6 +267,16 @@ async function createStore() {
         const res = await pool.query('SELECT id, name, size, mime FROM uploads WHERE id = $1', [id]);
         return res.rows[0] || null;
       },
+      async getSetting(key) {
+        const res = await pool.query('SELECT value FROM settings WHERE key = $1', [key]);
+        return res.rows[0] ? res.rows[0].value : null;
+      },
+      async setSetting(key, value) {
+        await pool.query(
+          'INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+          [key, String(value)]
+        );
+      },
       async close() {
         await pool.end();
       }
@@ -265,6 +291,7 @@ async function createStore() {
   if (!leadCols.includes('upload_id')) db.exec('ALTER TABLE leads ADD COLUMN upload_id TEXT');
   if (!leadCols.includes('upload_name')) db.exec('ALTER TABLE leads ADD COLUMN upload_name TEXT');
   db.exec(CREATE_UPLOADS_SQLITE);
+  db.exec(CREATE_SETTINGS_SQLITE);
   db.exec('CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at DESC)');
 
   const insertSql =
@@ -329,6 +356,15 @@ async function createStore() {
     async getUploadMeta(id) {
       return db.prepare('SELECT id, name, size, mime FROM uploads WHERE id = ?').get(id) || null;
     },
+    async getSetting(key) {
+      const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+      return row ? row.value : null;
+    },
+    async setSetting(key, value) {
+      db.prepare(
+        'INSERT INTO settings (key, value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+      ).run(key, String(value));
+    },
     async close() {
       db.close();
     }
@@ -336,6 +372,14 @@ async function createStore() {
 }
 
 const store = await createStore();
+
+const portal = createPortal({
+  store,
+  baseUrl: process.env.TG_PORTAL_URL || 'https://vertriebspartner.teamgermany.de',
+  user: process.env.TG_PORTAL_USER || '',
+  pass: process.env.TG_PORTAL_PASS || '',
+  tariffPath: process.env.TG_TARIFF_PATH || '/tarifrechner/'
+});
 
 const sessions = new Map();
 const rateBuckets = new Map();
@@ -439,6 +483,11 @@ function headerFileName(name) {
 
 function isUuid(value) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
+function titleOf(html) {
+  const match = String(html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  return match ? match[1].replace(/\s+/g, ' ').trim().slice(0, 200) : '';
 }
 
 function clientIp(req) {
@@ -800,6 +849,54 @@ async function handleApi(req, res, url, pathname) {
     return json(res, 200, { ok: true });
   }
 
+  if (pathname === '/api/admin/portal/status' && req.method === 'GET') {
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    return json(res, 200, { ok: true, ...(await portal.status()) });
+  }
+
+  if (pathname === '/api/admin/portal/connect' && req.method === 'POST') {
+    if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    try {
+      const session = await portal.ensure();
+      return json(res, 200, { ok: true, url: session.url, title: titleOf(session.html) });
+    } catch (err) {
+      console.error('portal connect:', err.message);
+      return json(res, 502, { ok: false, error: err.message });
+    }
+  }
+
+  if (pathname === '/api/admin/portal/sync' && req.method === 'POST') {
+    if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    try {
+      const page = await portal.fetchPage();
+      await store.setSetting('portal_last_html', page.html);
+      await store.setSetting('portal_last_url', page.url);
+      await store.setSetting('portal_last_sync', new Date().toISOString());
+      return json(res, 200, {
+        ok: true,
+        url: page.url,
+        title: titleOf(page.html),
+        bytes: Buffer.byteLength(page.html)
+      });
+    } catch (err) {
+      console.error('portal sync:', err.message);
+      return json(res, 502, { ok: false, error: err.message });
+    }
+  }
+
+  if (pathname === '/api/admin/portal/page' && req.method === 'GET') {
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    const html = await store.getSetting('portal_last_html');
+    if (!html) return json(res, 404, { ok: false, error: 'kein_snapshot' });
+    res.writeHead(200, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store'
+    });
+    return res.end(html);
+  }
+
   return json(res, 404, { ok: false, error: 'not_found' });
 }
 
@@ -870,6 +967,9 @@ const server = http.createServer(async (req, res) => {
     else res.end();
   }
 });
+
+// Der Portal-Login kann bis zu 10 Minuten auf einen Telegram-MFA-Code warten.
+server.requestTimeout = 15 * 60 * 1000;
 
 server.listen(PORT, HOST, () => {
   console.log('');

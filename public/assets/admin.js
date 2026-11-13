@@ -42,6 +42,7 @@
   function showDash() {
     loginEl.hidden = true;
     dashEl.hidden = false;
+    loadPortalStatus();
   }
 
   function currentFilters() {
@@ -344,6 +345,88 @@
         dialogSave.disabled = false;
       });
   });
+
+  /* ---------- portal ---------- */
+  var portalStatusEl = document.getElementById('portal-status');
+  var portalConnect = document.getElementById('portal-connect');
+  var portalSync = document.getElementById('portal-sync');
+  var portalPage = document.getElementById('portal-page');
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleString('de-DE');
+    } catch (e) {
+      return iso;
+    }
+  }
+
+  function loadPortalStatus() {
+    if (!portalStatusEl) return Promise.resolve();
+    return fetch('/api/admin/portal/status', { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) {
+          showLogin();
+          throw new Error('auth');
+        }
+        return r.json();
+      })
+      .then(function (data) {
+        if (!data.ok) return;
+        if (!data.enabled) {
+          portalStatusEl.textContent = 'Zugangsdaten fehlen (TG_PORTAL_USER / TG_PORTAL_PASS).';
+          if (portalConnect) portalConnect.disabled = true;
+          if (portalSync) portalSync.disabled = true;
+          return;
+        }
+        if (portalConnect) portalConnect.disabled = false;
+        if (portalSync) portalSync.disabled = !data.connected;
+        portalStatusEl.textContent = data.connected
+          ? 'Verbunden seit ' + fmtDate(data.connectedAt) + ' · letzter Abruf: ' + fmtDate(data.lastSync)
+          : 'Nicht verbunden · Telegram-MFA: ' + (data.telegram ? 'aktiv' : 'fehlt');
+        if (portalPage) portalPage.hidden = !data.lastSync;
+      })
+      .catch(function () {});
+  }
+
+  if (portalConnect) {
+    portalConnect.addEventListener('click', function () {
+      portalConnect.disabled = true;
+      if (portalSync) portalSync.disabled = true;
+      portalStatusEl.textContent = 'Anmeldung läuft. Falls MFA verlangt wird, kommt der Code per Telegram.';
+      fetch('/api/admin/portal/connect', { method: 'POST', credentials: 'same-origin' })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+        .then(function (res) {
+          portalStatusEl.textContent = res.ok && res.body.ok
+            ? 'Verbunden: ' + (res.body.title || res.body.url)
+            : 'Fehler: ' + (res.body.error || 'unbekannt');
+          return loadPortalStatus();
+        })
+        .catch(function () {
+          portalStatusEl.textContent = 'Verbindung fehlgeschlagen.';
+          portalConnect.disabled = false;
+        });
+    });
+  }
+
+  if (portalSync) {
+    portalSync.addEventListener('click', function () {
+      portalSync.disabled = true;
+      portalStatusEl.textContent = 'Portal-Seite wird geladen …';
+      fetch('/api/admin/portal/sync', { method: 'POST', credentials: 'same-origin' })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+        .then(function (res) {
+          portalStatusEl.textContent = res.ok && res.body.ok
+            ? 'Geladen: ' + (res.body.title || res.body.url) + ' · ' + res.body.bytes + ' Bytes'
+            : 'Fehler: ' + (res.body.error || 'unbekannt');
+          return loadPortalStatus();
+        })
+        .catch(function () {
+          portalStatusEl.textContent = 'Abruf fehlgeschlagen.';
+          portalSync.disabled = false;
+        });
+    });
+  }
 
   fetch('/api/admin/session', { credentials: 'same-origin' })
     .then(function (r) { return r.json(); })

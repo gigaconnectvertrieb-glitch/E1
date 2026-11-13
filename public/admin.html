@@ -6,7 +6,7 @@
   <title>Leads — E1 EnergyOne Admin</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=2">
+  <link rel="stylesheet" href="/assets/styles.css?v=3">
 </head>
 <body class="admin-body">
 
@@ -62,6 +62,18 @@
         <div class="stat"><span>Gewonnen</span><strong id="stat-gewonnen">0</strong></div>
         <div class="stat"><span>Verloren</span><strong id="stat-verloren">0</strong></div>
       </div>
+
+      <section class="portal-card">
+        <div>
+          <h2>Vertriebsportal</h2>
+          <p class="tiny" id="portal-status">Status wird geladen …</p>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-ghost btn-sm" id="portal-connect" type="button">Verbinden</button>
+          <button class="btn btn-primary btn-sm" id="portal-sync" type="button">Tarife laden</button>
+          <a class="btn btn-ghost btn-sm" id="portal-page" href="/api/admin/portal/page" target="_blank" rel="noopener" hidden>Seite ansehen</a>
+        </div>
+      </section>
 
       <form class="filters" id="filters">
         <select name="status" aria-label="Status filtern">
@@ -142,6 +154,6 @@
   </div>
 </dialog>
 
-<script src="/assets/admin.js?v=2"></script>
+<script src="/assets/admin.js?v=3"></script>
 </body>
 </html>

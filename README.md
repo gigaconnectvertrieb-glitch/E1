@@ -75,6 +75,18 @@ Der Free-Plan hat keine persistente Platte. SQLite-Daten (Leads, Token) gehen be
 
 Alternativen: Supabase (Free), Render Postgres (Free, zeitlich begrenzt). Der Server erkennt Postgres automatisch am gesetzten `DATABASE_URL`.
 
+## TeamGermany-Portal
+
+Das Portal verlangt nach dem Login einen 6-stelligen Code per E-Mail. Der Server fragt ihn über Telegram ab:
+
+- `TG_PORTAL_URL`, `TG_PORTAL_USER`, `TG_PORTAL_PASS` — Zugangsdaten, nur als Env.
+- `TG_BOT_TOKEN`, `TG_CHAT_ID` — Bot, der den Code anfordert.
+- Admin → **Verbinden**: Login, bei MFA schickt der Bot eine Nachricht. Der Code wird als Antwort an den Bot geschickt, der Server übernimmt ihn.
+- Session-Cookies werden in der `settings`-Tabelle gespeichert und für weitere Abrufe verwendet.
+- **Tarife laden** zieht die Tarifseite und legt einen Snapshot ab (Admin: „Seite ansehen“).
+
+Für unbeaufsichtigtes Polling über lange Zeit ist ein Service-Account ohne MFA oder ein API-/Export-Zugang von TeamGermany der stabile Weg. Die Session-Cookies laufen irgendwann ab; dann fragt der Bot erneut.
+
 ## Admin
 
 - Login mit `E1_ADMIN_TOKEN`.
