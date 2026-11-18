@@ -14,3 +14,13 @@ services:
         value: 0.0.0.0
       - key: E1_ADMIN_TOKEN
         generateValue: true
+      - key: TG_PORTAL_URL
+        value: https://vertriebspartner.teamgermany.de
+      - key: TG_PORTAL_USER
+        sync: false
+      - key: TG_PORTAL_PASS
+        sync: false
+      - key: TG_BOT_TOKEN
+        sync: false
+      - key: TG_CHAT_ID
+        sync: false
