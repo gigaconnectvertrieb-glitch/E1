@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Türblick — E1</title>
+  <meta name="theme-color" content="#06080a">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css?v=4">
+  <link rel="stylesheet" href="/assets/tuer.css?v=2">
+</head>
+<body class="tuer-body">
+  <main class="tuer-wrap">
+    <header class="tuer-top">
+      <div>
+        <p class="tuer-kicker">E1 · an der Tür</p>
+        <h1>Türblick</h1>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="mode" type="button">Kunde zeigen</button>
+    </header>
+
+    <section class="tuer-pin" id="pin-gate">
+      <h2>Tür-Code</h2>
+      <p>Einmal aus dem Admin. Danach merkt sich das Tablet den Code.</p>
+      <form id="pin-form">
+        <input id="pin-input" inputmode="numeric" autocomplete="off" maxlength="32" placeholder="6 Ziffern" aria-label="Tür-Code">
+        <button class="btn btn-primary" type="submit">Speichern</button>
+      </form>
+      <p class="tuer-note" id="pin-error" hidden></p>
+    </section>
+
+    <div class="tuer-app" id="app" hidden>
+      <section class="tuer-controls">
+        <div class="tuer-switch" role="group" aria-label="Sparte">
+          <button type="button" class="is-on" data-sparte="strom">Strom</button>
+          <button type="button" data-sparte="gas">Gas</button>
+        </div>
+
+        <button class="tuer-locate" id="locate" type="button">
+          <span class="tuer-locate-title">Standort</span>
+          <span class="tuer-locate-sub" id="locate-sub">Tippen, dann läuft die Position mit</span>
+        </button>
+
+        <label>PLZ
+          <input id="plz" inputmode="numeric" maxlength="5" autocomplete="postal-code" placeholder="PLZ">
+        </label>
+        <label>Ort
+          <input id="ort" autocomplete="address-level2" placeholder="kommt vom Standort">
+        </label>
+        <label>Verbrauch im Jahr
+          <input id="kwh" inputmode="numeric" value="3500">
+        </label>
+        <div class="tuer-presets" id="presets"></div>
+        <label>Aktuelle Jahreskosten
+          <input id="aktuell" inputmode="decimal" placeholder="z. B. 1460">
+        </label>
+        <label>oder Abschlag im Monat
+          <input id="abschlag" inputmode="decimal" placeholder="× 12">
+        </label>
+        <p class="tuer-note" id="status">Standort holen, dann erscheint der günstigste 24-Monats-Tarif ab 150 € Provision.</p>
+      </section>
+
+      <section class="tuer-result" id="result" aria-live="polite">
+        <p class="tuer-kicker" id="result-kicker">Ersparnis</p>
+        <p class="tuer-hero" id="hero">—</p>
+        <p class="tuer-hero-label" id="hero-label">Jahreskosten vom Kunden eintragen</p>
+        <p class="tuer-subsave" id="subsave"></p>
+        <div class="tuer-compare" id="compare" hidden>
+          <div><span>Jetzt</span><strong id="now">—</strong></div>
+          <div><span>Neu</span><strong id="next">—</strong></div>
+          <div><span>Weniger</span><strong id="delta">—</strong></div>
+        </div>
+        <p class="tuer-offer" id="offer"></p>
+        <p class="tuer-meta nur-berater" id="meta"></p>
+        <div class="tuer-alts nur-berater" id="alts"></div>
+      </section>
+    </div>
+  </main>
+  <script src="/assets/tuer.js?v=2"></script>
+</body>
+</html>

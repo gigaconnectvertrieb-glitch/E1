@@ -373,6 +373,45 @@ async function createStore() {
 
 const store = await createStore();
 
+let tuerPin = process.env.TUER_PIN || '';
+if (!/^[0-9A-Za-z]{4,32}$/.test(tuerPin)) {
+  tuerPin = (await store.getSetting('tuer_pin')) || '';
+  if (!/^\d{6}$/.test(tuerPin)) {
+    tuerPin = String(crypto.randomInt(100000, 1000000));
+    await store.setSetting('tuer_pin', tuerPin);
+  }
+}
+const tuerCache = new Map();
+const standortCache = new Map();
+
+async function plzFromCoords(lat, lon) {
+  const key = lat.toFixed(3) + ',' + lon.toFixed(3);
+  const hit = standortCache.get(key);
+  if (hit && Date.now() - hit.at < 10 * 60 * 1000) return hit.value;
+  const endpoint =
+    'https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=' +
+    encodeURIComponent(String(lat)) +
+    '&lon=' +
+    encodeURIComponent(String(lon));
+  const response = await fetch(endpoint, {
+    headers: {
+      'User-Agent': 'E1-Tuerblick/1.0 (https://e1-5c1v.onrender.com/tuer.html)',
+      Accept: 'application/json',
+      'Accept-Language': 'de'
+    },
+    signal: AbortSignal.timeout(8000)
+  });
+  if (!response.ok) throw new Error('standort_lookup');
+  const data = await response.json();
+  const address = data.address || {};
+  const plz = String(address.postcode || '').match(/\d{5}/);
+  const ort = address.city || address.town || address.village || address.municipality || address.suburb || '';
+  if (!plz) throw new Error('keine_plz');
+  const value = { plz: plz[0], ort: String(ort).slice(0, 80) };
+  standortCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
 const portal = createPortal({
   store,
   baseUrl: process.env.TG_PORTAL_URL || 'https://vertriebspartner.teamgermany.de',
@@ -404,7 +443,7 @@ function securityHeaders(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+  res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
   res.setHeader(
     'Content-Security-Policy',
     "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'"
@@ -849,9 +888,112 @@ async function handleApi(req, res, url, pathname) {
     return json(res, 200, { ok: true });
   }
 
+  if (pathname === '/api/tuer/standort' && req.method === 'POST') {
+    if (!rateLimit('tuer-ort:' + ipHash(req), 30, 10 * 60 * 1000)) {
+      return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
+    }
+    const got = String(req.headers['x-tuer-pin'] || '');
+    if (!safeEqual(got, tuerPin)) return json(res, 401, { ok: false, error: 'pin' });
+    let body;
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      return json(res, err.status || 400, { ok: false, error: err.message || 'invalid_json' });
+    }
+    const lat = Number(body.lat);
+    const lon = Number(body.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      return json(res, 400, { ok: false, error: 'koordinaten' });
+    }
+    try {
+      const place = await plzFromCoords(lat, lon);
+      return json(res, 200, { ok: true, ...place });
+    } catch (err) {
+      console.error('standort:', err.message);
+      return json(res, 502, { ok: false, error: err.message === 'keine_plz' ? 'keine_plz' : 'standort_lookup' });
+    }
+  }
+
+  if (pathname === '/api/tuer' && req.method === 'GET') {
+    if (!rateLimit('tuer:' + ipHash(req), 40, 10 * 60 * 1000)) {
+      return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
+    }
+    const got = String(req.headers['x-tuer-pin'] || '');
+    if (!safeEqual(got, tuerPin)) return json(res, 401, { ok: false, error: 'pin' });
+
+    const sparte = url.searchParams.get('sparte') === 'gas' ? 'gas' : 'strom';
+    const plz = String(url.searchParams.get('plz') || '').trim();
+    const kwh = Number(url.searchParams.get('kwh'));
+    const ort = String(url.searchParams.get('ort') || '').trim().slice(0, 80);
+    const aktuellRaw = String(url.searchParams.get('aktuell') || '').trim();
+    const aktuellNorm = aktuellRaw.includes(',')
+      ? aktuellRaw.replace(/\./g, '').replace(',', '.')
+      : aktuellRaw;
+    const aktuell = aktuellNorm === '' ? null : Number(aktuellNorm);
+    const minProvision = 150;
+    if (!/^\d{5}$/.test(plz)) return json(res, 400, { ok: false, error: 'plz' });
+    if (!Number.isFinite(kwh) || kwh < 200 || kwh > 500000) {
+      return json(res, 400, { ok: false, error: 'verbrauch' });
+    }
+
+    const cacheKey = [sparte, plz, Math.round(kwh), ort].join('|');
+    const fresh = url.searchParams.get('frisch') === '1';
+    const hit = tuerCache.get(cacheKey);
+    if (!fresh && hit && Date.now() - hit.at < 90 * 1000) {
+      return json(res, 200, { ...hit.payload, cache: true, aktuell: Number.isFinite(aktuell) ? aktuell : null });
+    }
+
+    try {
+      const ranked = await portal.calculateRates({
+        sparte,
+        plz,
+        kwh,
+        city: ort,
+        minProvision
+      });
+      if (ranked.error && ranked.scanned === 0) {
+        return json(res, 502, { ok: false, error: ranked.error });
+      }
+      const best = ranked.qualified[0] || null;
+      const payload = {
+        ok: true,
+        sparte,
+        plz,
+        ort,
+        kwh: Math.round(kwh),
+        minProvision,
+        preisgarantieMonate: 24,
+        aktuell: Number.isFinite(aktuell) ? aktuell : null,
+        scanned: ranked.scanned,
+        qualified: ranked.qualified.length,
+        hidden: ranked.hidden,
+        unknown: ranked.unknown,
+        ohne24: ranked.droppedGuarantee || 0,
+        felder: best ? undefined : ranked.sampleKeys,
+        syncedAt: new Date().toISOString(),
+        best,
+        alternativen: ranked.qualified.slice(1, 4),
+        cache: false
+      };
+      if (best) tuerCache.set(cacheKey, { at: Date.now(), payload });
+      return json(res, 200, payload);
+    } catch (err) {
+      console.error('tuer:', err.message);
+      const known = new Set([
+        'mfa_required',
+        'mfa_timeout',
+        'mfa_rejected',
+        'portal_credentials_missing',
+        'login_failed',
+        'portal_url_missing'
+      ]);
+      return json(res, 502, { ok: false, error: known.has(err.message) ? err.message : 'portal_fehler' });
+    }
+  }
+
   if (pathname === '/api/admin/portal/status' && req.method === 'GET') {
     if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
-    return json(res, 200, { ok: true, ...(await portal.status()) });
+    return json(res, 200, { ok: true, ...(await portal.status()), tuerPin });
   }
 
   if (pathname === '/api/admin/portal/connect' && req.method === 'POST') {

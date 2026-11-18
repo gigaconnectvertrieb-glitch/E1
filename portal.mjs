@@ -1,4 +1,5 @@
 import { telegramEnabled, requestCode, sendMessage } from './telegram.mjs';
+import { rankRates, MIN_PROVISION } from './rates.mjs';
 
 const DEFAULT_HEADERS = {
   'User-Agent':
@@ -209,12 +210,131 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     };
   }
 
+  function extractRequestParameter(html) {
+    const match = String(html || '').match(/requestParameter["']?\s*[:=]\s*["']([A-Za-z0-9_]+)["']/);
+    return match ? match[1] : null;
+  }
+
+  function extractCsrf(html) {
+    const source = String(html || '');
+    const named = source.match(/name=["']csrf-token["'][^>]*content=["']([^"']+)["']/i);
+    if (named) return named[1];
+    const reversed = source.match(/content=["']([^"']+)["'][^>]*name=["']csrf-token["']/i);
+    return reversed ? reversed[1] : '';
+  }
+
+  function extractResellerHash(html) {
+    const match = String(html || '').match(/reseller[_-]?hash["']?\s*[:=]\s*["']([A-Za-z0-9_-]+)["']/i);
+    return match ? match[1] : '';
+  }
+
+  async function postEgon(jar, eID, fields, csrf) {
+    const url =
+      base +
+      '/?eID=' +
+      encodeURIComponent(eID) +
+      (csrf ? '&HTTP_CSRFTOKEN=' + encodeURIComponent(csrf) : '');
+    const body = new URLSearchParams();
+    for (const [key, value] of Object.entries(fields)) {
+      if (value == null) continue;
+      body.set(key, String(value));
+    }
+    const result = await request(url, { method: 'POST', body: body.toString(), jar });
+    let data = null;
+    try {
+      data = JSON.parse(result.html);
+    } catch {}
+    return { status: result.status, url: result.url, data, html: result.html };
+  }
+
+  async function discoverPortal(jar) {
+    const candidates = [path, '/buero/', '/dashboard/', '/main-menu-right/dashboard/', '/'];
+    const seen = new Set();
+    let html = '';
+    let pageUrl = '';
+    for (const candidate of candidates) {
+      if (!candidate || seen.has(candidate)) continue;
+      seen.add(candidate);
+      try {
+        const page = await request(base + candidate, { jar });
+        if (!page.html) continue;
+        html = page.html;
+        pageUrl = page.url;
+        if (extractRequestParameter(page.html)) break;
+      } catch {}
+    }
+    return { html, url: pageUrl };
+  }
+
+  async function calculateRates({ sparte, plz, kwh, city, minProvision }) {
+    const session = await ensure();
+    const found = await discoverPortal(session.jar);
+    const csrf = extractCsrf(found.html);
+    const hash = extractResellerHash(found.html);
+    const parameter = extractRequestParameter(found.html);
+    const eids = parameter
+      ? [parameter, 'tx_egon_pi1', 'egon'].filter((item, index, all) => all.indexOf(item) === index)
+      : ['tx_egon_pi1', 'egon', 'egon_pi1'];
+
+    const payload = {
+      todo: 'getRateData',
+      order_type: sparte === 'gas' ? 'gas' : 'electric',
+      customer_type: 'private',
+      country_id: '81',
+      zip: plz,
+      city: city || '',
+      street: '',
+      street_number: '',
+      consum: String(Math.round(kwh)),
+      consum_nt: '0',
+      netz_id: '',
+      counter_type: '',
+      rate_type: '0'
+    };
+    if (hash) payload.rHash = hash;
+
+    let lastError = 'tarifrechner_unerreichbar';
+    let sampleKeys = [];
+    for (const eid of eids) {
+      const res = await postEgon(session.jar, eid, payload, csrf);
+      const data = res.data;
+      if (!data || typeof data !== 'object') continue;
+      const list = Array.isArray(data.getRateData) ? data.getRateData : null;
+      if (list) {
+        const ranked = rankRates(list, minProvision || MIN_PROVISION);
+        await store.setSetting('portal_last_sync', new Date().toISOString());
+        await store.setSetting('portal_last_url', res.url || found.url || '');
+        return { ...ranked, eID: eid, error: null };
+      }
+      if (data.success === false || data.error) {
+        const message = Array.isArray(data.error) ? data.error.join(' ') : String(data.error || data.message || '');
+        lastError = message || 'tarifrechner_fehler';
+        if (data.getRateData && typeof data.getRateData === 'object') {
+          sampleKeys = Object.keys(data.getRateData).slice(0, 40);
+        }
+        if (/unknown|unbekannt|todo/i.test(lastError)) continue;
+        break;
+      }
+    }
+
+    return {
+      qualified: [],
+      hidden: 0,
+      unknown: 0,
+      scanned: 0,
+      sampleKeys,
+      eID: null,
+      error: lastError
+    };
+  }
+
   return {
     status,
     ensure,
     fetchPage,
     login,
     hasMfa,
-    isLoggedIn
+    isLoggedIn,
+    calculateRates
   };
 }

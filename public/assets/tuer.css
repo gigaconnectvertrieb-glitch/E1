@@ -1,0 +1,217 @@
+.tuer-body {
+  min-height: 100vh;
+}
+
+.tuer-wrap {
+  width: min(1120px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 22px 0 48px;
+}
+
+.tuer-top,
+.tuer-pin,
+.tuer-controls,
+.tuer-result {
+  background: var(--panel-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.tuer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+.tuer-top h1,
+.tuer-pin h2 {
+  margin: 0;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.tuer-kicker {
+  margin: 0 0 6px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tuer-pin,
+.tuer-app {
+  display: grid;
+  gap: 14px;
+}
+
+.tuer-pin {
+  padding: 22px;
+  max-width: 460px;
+}
+
+.tuer-pin p,
+.tuer-note,
+.tuer-offer,
+.tuer-meta {
+  color: var(--muted);
+}
+
+.tuer-pin form,
+.tuer-controls {
+  display: grid;
+  gap: 10px;
+}
+
+.tuer-pin input,
+.tuer-controls input {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 6px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: #070b0e;
+  color: var(--text);
+  font-size: 20px;
+}
+
+.tuer-controls {
+  padding: 16px;
+}
+
+.tuer-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tuer-switch button,
+.tuer-presets button,
+.tuer-locate,
+.tuer-alts button {
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 650;
+}
+
+.tuer-switch button.is-on,
+.tuer-presets button.is-on,
+.tuer-locate.is-on {
+  background: var(--accent);
+  color: #102006;
+  border-color: var(--accent);
+}
+
+.tuer-locate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  min-height: 84px;
+  padding: 12px 16px;
+  text-align: left;
+}
+
+.tuer-locate-title {
+  font-size: 22px;
+  letter-spacing: -0.03em;
+}
+
+.tuer-locate-sub,
+.tuer-offer,
+.tuer-meta,
+.tuer-note {
+  font-size: 14px;
+}
+
+.tuer-presets,
+.tuer-compare,
+.tuer-alts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tuer-result {
+  padding: 22px 20px 26px;
+}
+
+.tuer-hero {
+  margin: 8px 0 0;
+  font-size: clamp(64px, 12vw, 120px);
+  line-height: 0.88;
+  letter-spacing: -0.05em;
+  font-weight: 760;
+  color: var(--accent);
+}
+
+.tuer-hero.is-flat {
+  color: var(--text);
+}
+
+.tuer-subsave {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: 18px;
+}
+
+.tuer-compare {
+  margin-top: 18px;
+}
+
+.tuer-compare div {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tuer-compare span,
+.tuer-alts button span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tuer-compare strong {
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+
+.tuer-offer {
+  margin-bottom: 0;
+}
+
+.tuer-alts {
+  margin-top: 12px;
+}
+
+.tuer-alts button {
+  padding: 8px 12px;
+  text-align: left;
+}
+
+body.is-kunde .nur-berater {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .tuer-app {
+    grid-template-columns: 340px 1fr;
+    align-items: start;
+  }
+}
