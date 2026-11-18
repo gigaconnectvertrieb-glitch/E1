@@ -1,13 +1,7 @@
 (function () {
-  var PIN_KEY = 'e1-tuer-pin';
   var PRESETS = { strom: [1500, 2500, 3500, 4500, 6000], gas: [8000, 12000, 18000, 23000, 30000] };
   var euro = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-  var pinGate = document.getElementById('pin-gate');
-  var pinForm = document.getElementById('pin-form');
-  var pinInput = document.getElementById('pin-input');
-  var pinError = document.getElementById('pin-error');
-  var app = document.getElementById('app');
   var modeBtn = document.getElementById('mode');
   var locateBtn = document.getElementById('locate');
   var locateSub = document.getElementById('locate-sub');
@@ -30,14 +24,13 @@
   var metaEl = document.getElementById('meta');
   var altsEl = document.getElementById('alts');
 
-  var pin = localStorage.getItem(PIN_KEY) || '';
+  var pickedId = '';
   var sparte = 'strom';
   var watchId = null;
   var standortOn = false;
   var lastFix = '';
   var lastPlz = '';
   var timer = null;
-  var pickedId = '';
 
   function money(value) {
     var text = String(value || '').trim().replace(/\s/g, '').replace('€', '');
@@ -65,16 +58,6 @@
       });
       presetsEl.appendChild(button);
     });
-  }
-
-  function showApp() {
-    pinGate.hidden = true;
-    app.hidden = false;
-    renderPresets();
-  }
-
-  function headers() {
-    return { 'x-tuer-pin': pin };
   }
 
   function paint(data, rate) {
@@ -158,18 +141,9 @@
     var aktuell = money(aktuellEl.value);
     if (aktuell != null) params.set('aktuell', String(aktuell));
     if (force) params.set('frisch', '1');
-    fetch('/api/tuer?' + params.toString(), { headers: headers() })
+    fetch('/api/tuer?' + params.toString())
       .then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
       .then(function (res) {
-        if (res.status === 401) {
-          localStorage.removeItem(PIN_KEY);
-          pin = '';
-          app.hidden = true;
-          pinGate.hidden = false;
-          pinError.hidden = false;
-          pinError.textContent = 'Tür-Code ungültig.';
-          return;
-        }
         if (!res.ok || !res.body.ok) {
           setStatus(messageFor(res.body.error));
           paint(null, null);
@@ -226,7 +200,7 @@
   function lookup(pos) {
     fetch('/api/tuer/standort', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-tuer-pin': pin },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lat: pos.coords.latitude, lon: pos.coords.longitude })
     })
       .then(function (r) { return r.json(); })
@@ -310,15 +284,5 @@
     modeBtn.textContent = on ? 'Berater' : 'Kunde zeigen';
   });
 
-  pinForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    pin = pinInput.value.trim();
-    if (pin.length < 4) return;
-    localStorage.setItem(PIN_KEY, pin);
-    pinError.hidden = true;
-    showApp();
-  });
-
   renderPresets();
-  if (pin) showApp();
 })();

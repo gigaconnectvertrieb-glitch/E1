@@ -385,10 +385,6 @@
           ? 'Verbunden seit ' + fmtDate(data.connectedAt) + ' · letzter Abruf: ' + fmtDate(data.lastSync)
           : 'Nicht verbunden · Telegram-MFA: ' + (data.telegram ? 'aktiv' : 'fehlt');
         if (portalPage) portalPage.hidden = !data.lastSync;
-        var tuerEl = document.getElementById('portal-tuer');
-        if (tuerEl && data.tuerPin) {
-          tuerEl.textContent = 'Türblick: /tuer.html · Tür-Code ' + data.tuerPin + ' (einmal auf dem Tablet speichern)';
-        }
       })
       .catch(function () {});
   }

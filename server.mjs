@@ -373,14 +373,6 @@ async function createStore() {
 
 const store = await createStore();
 
-let tuerPin = process.env.TUER_PIN || '';
-if (!/^[0-9A-Za-z]{4,32}$/.test(tuerPin)) {
-  tuerPin = (await store.getSetting('tuer_pin')) || '';
-  if (!/^\d{6}$/.test(tuerPin)) {
-    tuerPin = String(crypto.randomInt(100000, 1000000));
-    await store.setSetting('tuer_pin', tuerPin);
-  }
-}
 const tuerCache = new Map();
 const standortCache = new Map();
 
@@ -892,8 +884,6 @@ async function handleApi(req, res, url, pathname) {
     if (!rateLimit('tuer-ort:' + ipHash(req), 30, 10 * 60 * 1000)) {
       return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
     }
-    const got = String(req.headers['x-tuer-pin'] || '');
-    if (!safeEqual(got, tuerPin)) return json(res, 401, { ok: false, error: 'pin' });
     let body;
     try {
       body = await readJson(req);
@@ -918,8 +908,6 @@ async function handleApi(req, res, url, pathname) {
     if (!rateLimit('tuer:' + ipHash(req), 40, 10 * 60 * 1000)) {
       return json(res, 429, { ok: false, error: 'zu_viele_anfragen' });
     }
-    const got = String(req.headers['x-tuer-pin'] || '');
-    if (!safeEqual(got, tuerPin)) return json(res, 401, { ok: false, error: 'pin' });
 
     const sparte = url.searchParams.get('sparte') === 'gas' ? 'gas' : 'strom';
     const plz = String(url.searchParams.get('plz') || '').trim();
@@ -993,7 +981,7 @@ async function handleApi(req, res, url, pathname) {
 
   if (pathname === '/api/admin/portal/status' && req.method === 'GET') {
     if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
-    return json(res, 200, { ok: true, ...(await portal.status()), tuerPin });
+    return json(res, 200, { ok: true, ...(await portal.status()) });
   }
 
   if (pathname === '/api/admin/portal/connect' && req.method === 'POST') {

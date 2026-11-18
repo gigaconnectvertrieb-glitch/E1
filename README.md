@@ -84,7 +84,7 @@ Das Portal verlangt nach dem Login einen 6-stelligen Code per E-Mail. Der Server
 - Admin → **Verbinden**: Login, bei MFA schickt der Bot eine Nachricht. Der Code wird als Antwort an den Bot geschickt, der Server übernimmt ihn.
 - Session-Cookies werden in der `settings`-Tabelle gespeichert und für weitere Abrufe verwendet.
 - **Tarife laden** zieht die Tarifseite und legt einen Snapshot ab (Admin: „Seite ansehen“).
-- **Türblick** unter `/tuer.html`: Tablet-Ansicht für die Haustür. Der Standort-Knopf liest die Tablet-Position, setzt PLZ und Ort und holt den günstigsten Tarif mit **24 Monaten Preisgarantie** und **mindestens 150 € Provision**. Den Tür-Code einmal im Admin ablesen. Aktuelle Jahreskosten vom Kunden bleiben das einzige, was an der Tür noch getippt wird.
+- **Türblick** unter `/tuer.html`: Tablet-Ansicht für die Haustür. Der Standort-Knopf liest die Tablet-Position, setzt PLZ und Ort und holt den günstigsten Tarif mit **24 Monaten Preisgarantie** und **mindestens 150 € Provision**. Kein extra Code. Aktuelle Jahreskosten vom Kunden bleiben das einzige, was an der Tür noch getippt wird.
 
 Für unbeaufsichtigtes Polling über lange Zeit ist ein Service-Account ohne MFA oder ein API-/Export-Zugang von TeamGermany der stabile Weg. Die Session-Cookies laufen irgendwann ab; dann fragt der Bot erneut.
 
