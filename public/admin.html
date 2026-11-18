@@ -70,6 +70,8 @@
         </div>
         <div class="admin-actions">
           <button class="btn btn-ghost btn-sm" id="portal-connect" type="button">Verbinden</button>
+          <input id="portal-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Mail-Code" aria-label="Code aus der E-Mail">
+          <button class="btn btn-ghost btn-sm" id="portal-code-send" type="button">Code senden</button>
           <button class="btn btn-primary btn-sm" id="portal-sync" type="button">Tarife laden</button>
           <a class="btn btn-ghost btn-sm" id="portal-page" href="/api/admin/portal/page" target="_blank" rel="noopener" hidden>Seite ansehen</a>
         </div>
@@ -154,6 +156,6 @@
   </div>
 </dialog>
 
-<script src="/assets/admin.js?v=3"></script>
+<script src="/assets/admin.js?v=4"></script>
 </body>
 </html>

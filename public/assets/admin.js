@@ -393,7 +393,7 @@
     portalConnect.addEventListener('click', function () {
       portalConnect.disabled = true;
       if (portalSync) portalSync.disabled = true;
-      portalStatusEl.textContent = 'Anmeldung läuft. Falls MFA verlangt wird, kommt der Code per Telegram.';
+      portalStatusEl.textContent = 'Anmeldung läuft. Code aus der Mail unten eintragen oder an den Bot schicken.';
       fetch('/api/admin/portal/connect', { method: 'POST', credentials: 'same-origin' })
         .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
         .then(function (res) {
@@ -405,6 +405,33 @@
         .catch(function () {
           portalStatusEl.textContent = 'Verbindung fehlgeschlagen.';
           portalConnect.disabled = false;
+        });
+    });
+  }
+
+  var portalCode = document.getElementById('portal-code');
+  var portalCodeSend = document.getElementById('portal-code-send');
+  if (portalCodeSend) {
+    portalCodeSend.addEventListener('click', function () {
+      var code = (portalCode && portalCode.value || '').replace(/\D/g, '');
+      if (code.length !== 6) {
+        portalStatusEl.textContent = 'Genau 6 Ziffern aus der neuesten Mail.';
+        return;
+      }
+      fetch('/api/admin/portal/code', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code })
+      })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+        .then(function (res) {
+          portalStatusEl.textContent = res.ok && res.body.ok
+            ? 'Code ist drin. Anmeldung läuft weiter.'
+            : 'Code nicht angenommen. Erst auf Verbinden, dann die 6 Ziffern.';
+        })
+        .catch(function () {
+          portalStatusEl.textContent = 'Code konnte nicht gesendet werden.';
         });
     });
   }

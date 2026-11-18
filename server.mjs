@@ -984,6 +984,20 @@ async function handleApi(req, res, url, pathname) {
     return json(res, 200, { ok: true, ...(await portal.status()) });
   }
 
+  if (pathname === '/api/admin/portal/code' && req.method === 'POST') {
+    if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    let body;
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      return json(res, err.status || 400, { ok: false, error: err.message || 'invalid_json' });
+    }
+    const accepted = portal.submitCode(body.code);
+    if (!accepted) return json(res, 400, { ok: false, error: 'code' });
+    return json(res, 200, { ok: true });
+  }
+
   if (pathname === '/api/admin/portal/connect' && req.method === 'POST') {
     if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
     if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });

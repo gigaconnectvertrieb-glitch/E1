@@ -26,6 +26,21 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
   const path = tariffPath || '/tarifrechner/';
   const maxAttempts = Math.max(1, Number(process.env.TG_MFA_ATTEMPTS || 1));
   let jar = null;
+  let pendingResolve = null;
+  let pendingCode = null;
+
+  function takePendingCode(code) {
+    const clean = String(code || '').replace(/\D/g, '');
+    if (!/^\d{6}$/.test(clean)) return false;
+    if (pendingResolve) {
+      const resolve = pendingResolve;
+      pendingResolve = null;
+      resolve(clean);
+      return true;
+    }
+    pendingCode = clean;
+    return true;
+  }
 
   async function request(url, options) {
     const opts = options || {};
@@ -124,15 +139,35 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     });
 
     if (hasMfa(result.html)) {
-      if (!telegramEnabled()) throw new Error('mfa_required');
-      const label = maxAttempts > 1 ? ' (Versuch ' + attempt + '/' + maxAttempts + ')' : '';
-      const code = await requestCode(
-        'E1 Portal' + label + ': Der Code geht an gigaconnectvertrieb@gmail.com (auch Spam prüfen). Bitte NUR die 6 Ziffern aus der NEUESTEN Mail senden. Alte Codes sind ungültig.'
-      );
+      const resent = await request(result.url || base + '/', {
+        method: 'POST',
+        body: new URLSearchParams({ resend_code: '1' }).toString(),
+        jar: nextJar
+      });
+      const page = hasMfa(resent.html) ? resent : result;
+      const note = /Neuer Code wurde versendet|Bestätigungscode an deine/i.test(page.html)
+        ? 'Portal sagt: Code wurde an die hinterlegte E-Mail geschickt.'
+        : 'Portal zeigt die Code-Seite, bestätigt aber keinen Versand.';
+
+      const fromTelegram = telegramEnabled()
+        ? requestCode(
+            'E1: ' + note + ' Nur die 6 Ziffern aus der neuesten Mail an gigaconnectvertrieb@gmail.com antworten. Oder den Code im Admin eintragen.'
+          ).catch(function () { return new Promise(function () {}); })
+        : new Promise(function () {});
+      const fromAdmin = pendingCode
+        ? Promise.resolve(pendingCode)
+        : new Promise(function (resolve) { pendingResolve = resolve; });
+      pendingCode = null;
+      const code = await Promise.race([
+        fromTelegram,
+        fromAdmin,
+        new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 10 * 60 * 1000); })
+      ]);
+      pendingResolve = null;
       if (!code) throw new Error('mfa_timeout');
       await sendMessage('E1 Portal: Code empfangen, wird geprüft …').catch(function () {});
 
-      const confirmed = await request(result.url || base + '/', {
+      const confirmed = await request(page.url || result.url || base + '/', {
         method: 'POST',
         body: new URLSearchParams({ code }).toString(),
         jar: nextJar
@@ -201,6 +236,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     return {
       enabled: Boolean(base && user && pass),
       telegram: telegramEnabled(),
+      awaitingCode: Boolean(pendingResolve),
       connected,
       connectedAt: await store.getSetting('portal_connected_at'),
       lastSync: await store.getSetting('portal_last_sync'),
@@ -333,6 +369,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     ensure,
     fetchPage,
     login,
+    submitCode: takePendingCode,
     hasMfa,
     isLoggedIn,
     calculateRates
