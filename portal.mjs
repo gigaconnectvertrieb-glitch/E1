@@ -139,15 +139,8 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     });
 
     if (hasMfa(result.html)) {
-      const resent = await request(result.url || base + '/', {
-        method: 'POST',
-        body: new URLSearchParams({ resend_code: '1' }).toString(),
-        jar: nextJar
-      });
-      const page = hasMfa(resent.html) ? resent : result;
-      const note = /Neuer Code wurde versendet|Bestätigungscode an deine/i.test(page.html)
-        ? 'Portal sagt: Code wurde an die hinterlegte E-Mail geschickt.'
-        : 'Portal zeigt die Code-Seite, bestätigt aber keinen Versand.';
+      const page = result;
+      const note = 'Portal hat einen Code an gigaconnectvertrieb@gmail.com geschickt. Nur diese 6 Ziffern antworten oder im Admin eintragen.';
 
       const fromTelegram = telegramEnabled()
         ? requestCode(
