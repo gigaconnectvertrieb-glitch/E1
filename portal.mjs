@@ -333,6 +333,53 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     };
     if (hash) payload.rHash = hash;
 
+    const eid = eids[0];
+    if (!payload.city) {
+      const cityRes = await postEgon(session.jar, eid, {
+        todo: 'getCity',
+        zip: plz,
+        country_id: '81'
+      }, csrf);
+      const cities = cityRes.data && cityRes.data.getCity;
+      if (Array.isArray(cities) && cities[0] && cities[0].city) payload.city = cities[0].city;
+    }
+    const netzRes = await postEgon(session.jar, eid, {
+      todo: 'getOrderProviderNetz',
+      orderType: payload.order_type,
+      country_id: '81',
+      zip: plz,
+      city: payload.city,
+      street: '',
+      street_number: ''
+    }, csrf);
+    const nets = netzRes.data && netzRes.data.getOrderProviderNetz;
+    if (Array.isArray(nets) && nets[0] && nets[0].netz_id) payload.netz_id = String(nets[0].netz_id);
+    if (!payload.netz_id && payload.city) {
+      const streetRes = await postEgon(session.jar, eid, {
+        todo: 'getStreet',
+        zip: plz,
+        city: payload.city,
+        country_id: '81'
+      }, csrf);
+      const streets = streetRes.data && streetRes.data.getStreet;
+      const street = Array.isArray(streets) && streets[0] && streets[0].street;
+      if (street) {
+        payload.street = street;
+        payload.street_number = '1';
+        const netz2 = await postEgon(session.jar, eid, {
+          todo: 'getOrderProviderNetz',
+          orderType: payload.order_type,
+          country_id: '81',
+          zip: plz,
+          city: payload.city,
+          street: street,
+          street_number: '1'
+        }, csrf);
+        const nets2 = netz2.data && netz2.data.getOrderProviderNetz;
+        if (Array.isArray(nets2) && nets2[0] && nets2[0].netz_id) payload.netz_id = String(nets2[0].netz_id);
+      }
+    }
+
     let lastError = 'tarifrechner_unerreichbar';
     let sampleKeys = [];
     for (const eid of eids) {
