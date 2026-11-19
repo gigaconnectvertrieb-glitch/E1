@@ -88,7 +88,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
   }
 
   function hasMfa(html) {
-    return /MFA-Authentication|Best(ä|ae)tigungscode/i.test(html || '');
+    return /id=["']egon-embedded-mfa["']|Best(?:ä|ae)tigungscode eingeben/i.test(html || '');
   }
 
   function isLoggedIn(html) {
@@ -115,7 +115,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     return null;
   }
 
-  async function loginAttempt(attempt) {
+  async function loginAttempt(attempt, interactive) {
     if (!user || !pass) throw new Error('portal_credentials_missing');
     if (!base) throw new Error('portal_url_missing');
 
@@ -139,6 +139,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     });
 
     if (hasMfa(result.html)) {
+      if (!interactive) throw new Error('mfa_required');
       const page = result;
       const note = 'Portal hat einen Code an gigaconnectvertrieb@gmail.com geschickt. Nur diese 6 Ziffern antworten oder im Admin eintragen.';
 
@@ -184,11 +185,11 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     return { jar: nextJar, status: result.status, url: result.url, html: result.html };
   }
 
-  async function login() {
+  async function login(interactive) {
     let lastError = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        return await loginAttempt(attempt);
+        return await loginAttempt(attempt, interactive !== false);
       } catch (err) {
         lastError = err;
         if (err.message === 'mfa_rejected') {
@@ -203,9 +204,9 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     throw lastError || new Error('login_failed');
   }
 
-  async function ensure() {
+  async function ensure(interactive) {
     const existing = await loadJar();
-    if (!existing) return login();
+    if (!existing) return login(interactive);
 
     const check = await request(base + path, { jar: existing });
     if (check.status === 200 && !hasMfa(check.html) && isLoggedIn(check.html)) {
@@ -214,7 +215,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
 
     jar = null;
     await store.setSetting('portal_cookies', '');
-    return login();
+    return login(interactive);
   }
 
   async function importSession(nextJar) {
@@ -306,7 +307,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
   }
 
   async function calculateRates({ sparte, plz, kwh, city, minProvision }) {
-    const session = await ensure();
+    const session = await ensure(false);
     const found = await discoverPortal(session.jar);
     const csrf = extractCsrf(found.html);
     const hash = extractResellerHash(found.html);
