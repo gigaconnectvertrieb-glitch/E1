@@ -62,6 +62,21 @@
   /* ---------- calculator ---------- */
   var calc = document.getElementById('calc');
   var tariffs = null;
+  var pickedId = '';
+  var portalTimer = null;
+  var portalToken = 0;
+
+  function portalMode() {
+    return calc && calc.getAttribute('data-quelle') === 'portal';
+  }
+
+  function moneyInput(value) {
+    var text = String(value || '').trim().replace(/\s/g, '').replace('€', '');
+    if (!text) return null;
+    if (text.indexOf(',') >= 0) text = text.replace(/\./g, '').replace(',', '.');
+    var n = Number(text);
+    return Number.isFinite(n) ? n : null;
+  }
 
   function clamp(n, min, max) {
     return Math.min(max, Math.max(min, n));
@@ -104,6 +119,12 @@
 
   function updateCalc() {
     if (!tariffs) return;
+    if (portalMode()) {
+      renderPresets();
+      markPresets();
+      schedulePortal();
+      return;
+    }
     var produkt = currentCalcProduct();
     var t = tariffs[produkt];
     var input = $('calc-verbrauch');
@@ -122,11 +143,111 @@
     setText('out-context', plz ? ' · ' + plz : '');
 
     if (input && !input.value) input.value = String(kwh);
+    markPresets();
+  }
 
-    Array.prototype.forEach.call(document.querySelectorAll('.preset'), function (preset) {
+  function markPresets() {
+    var input = $('calc-verbrauch');
+    var kwh = input ? parseInt(String(input.value).replace(/\D/g, ''), 10) : NaN;
+    Array.prototype.forEach.call(document.querySelectorAll('#presets .preset'), function (preset) {
       var n = parseInt(preset.textContent.replace(/\D/g, ''), 10);
       preset.classList.toggle('active', n === kwh);
     });
+  }
+
+  function schedulePortal() {
+    clearTimeout(portalTimer);
+    portalTimer = setTimeout(loadPortal, 400);
+  }
+
+  function paintPortal(data) {
+    var list = data && data.tarife && data.tarife.length ? data.tarife : [];
+    var rate = list.filter(function (item) { return item.id === pickedId; })[0] || list[0];
+    var jetzt = moneyInput($('calc-jetzt') && $('calc-jetzt').value);
+    var aktuell = jetzt == null ? null : jetzt * 12;
+    if (!rate) {
+      setText('out-platz', 'Platz');
+      setText('out-anbieter', '–');
+      setText('out-jahr', '–');
+      setText('out-saving', data && data.scanned ? 'Kein 24-Monats-Tarif' : '–');
+      setText('out-monat', '–');
+      setText('out-jetzt', jetzt == null ? '–' : nf2.format(jetzt) + ' €');
+      setText('out-sparen', '–');
+      var empty = $('calc-tarife');
+      if (empty) empty.innerHTML = '';
+      return;
+    }
+    pickedId = rate.id;
+    var jahr = rate.jahrespreis;
+    var save = aktuell == null ? null : aktuell - jahr;
+    setText('out-platz', 'Platz ' + rate.platz + ' von ' + list.length);
+    setText('out-anbieter', rate.anbieter || rate.name);
+    setText('out-context', '');
+    setText('out-jahr', nf.format(Math.round(jahr)));
+    setText('out-monat', nf2.format(jahr / 12) + ' €');
+    setText('out-jetzt', jetzt == null ? '–' : nf2.format(jetzt) + ' €');
+    if (save != null && save > 0) {
+      setText('out-saving', nf.format(Math.round(save)) + ' € weniger');
+      setText('out-sparen', nf.format(Math.round(save)) + ' €');
+    } else if (save != null) {
+      setText('out-saving', 'kein Vorteil');
+      setText('out-sparen', nf.format(Math.round(save)) + ' €');
+    } else {
+      setText('out-saving', 'Abschlag eintragen');
+      setText('out-sparen', '–');
+    }
+    var box = $('calc-tarife');
+    if (!box) return;
+    box.innerHTML = '';
+    list.forEach(function (alt) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'preset' + (alt.id === rate.id ? ' active' : '');
+      var altSave = save == null ? '' : ' · ' + nf.format(Math.round(aktuell - alt.jahrespreis)) + ' €';
+      button.textContent = alt.platz + ' ' + (alt.anbieter || alt.name) + ' · ' + nf.format(Math.round(alt.jahrespreis)) + ' €' + altSave;
+      button.addEventListener('click', function () {
+        pickedId = alt.id;
+        paintPortal(data);
+      });
+      box.appendChild(button);
+    });
+  }
+
+  function loadPortal() {
+    var produkt = currentCalcProduct();
+    var t = tariffs[produkt];
+    var input = $('calc-verbrauch');
+    var parsed = parseInt(input && input.value ? input.value.replace(/\D/g, '') : '', 10);
+    var kwh = Number.isFinite(parsed) ? clamp(parsed, t.min_verbrauch, t.max_verbrauch) : t.default_verbrauch;
+    var plzInput = $('calc-plz');
+    var plz = plzInput ? plzInput.value.trim() : '';
+    if (!/^\d{5}$/.test(plz)) {
+      setText('out-jahr', '–');
+      setText('out-saving', 'PLZ eintragen');
+      setText('out-platz', 'Platz');
+      setText('out-anbieter', '–');
+      return;
+    }
+    var token = ++portalToken;
+    setText('out-saving', 'wird geholt …');
+    var params = new URLSearchParams({
+      sparte: produkt,
+      plz: plz,
+      kwh: String(kwh)
+    });
+    fetch('/api/tuer?' + params.toString())
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (token !== portalToken) return;
+        if (!data || !data.ok) {
+          setText('out-saving', 'Abruf fehlgeschlagen');
+          return;
+        }
+        paintPortal(data);
+      })
+      .catch(function () {
+        if (token === portalToken) setText('out-saving', 'Abruf fehlgeschlagen');
+      });
   }
 
   function fillExample() {
@@ -151,6 +272,7 @@
           btn.addEventListener('click', function () {
             seg.forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
             btn.setAttribute('aria-pressed', 'true');
+            pickedId = '';
             var produkt = btn.getAttribute('data-produkt');
             var t = tariffs[produkt];
             var input = $('calc-verbrauch');
@@ -165,9 +287,11 @@
           });
         });
         var vi = $('calc-verbrauch');
-        if (vi) vi.addEventListener('input', updateCalc);
+        if (vi) vi.addEventListener('input', function () { pickedId = ''; updateCalc(); });
         var pi = $('calc-plz');
-        if (pi) pi.addEventListener('input', updateCalc);
+        if (pi) pi.addEventListener('input', function () { pickedId = ''; updateCalc(); });
+        var ji = $('calc-jetzt');
+        if (ji) ji.addEventListener('input', updateCalc);
         renderPresets();
         updateCalc();
         fillExample();

@@ -9,7 +9,7 @@
   <meta property="og:description" content="Ein Ansprechpartner, digitale Abwicklung, keine Versorgungslücke. Jetzt Preis berechnen.">
   <meta property="og:type" content="website">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3">
+  <link rel="stylesheet" href="/assets/styles.css?v=4">
 </head>
 <body>
 
@@ -61,7 +61,7 @@
       </div>
     </div>
 
-    <div class="calc" id="calc" aria-label="Preisrechner">
+    <div class="calc" id="calc" data-quelle="portal" aria-label="Preisrechner">
       <div class="calc-head">
         <div>
           <span class="calc-kicker">Preisrechner</span>
@@ -89,24 +89,30 @@
           <input id="calc-verbrauch" inputmode="numeric" placeholder="2800" autocomplete="off">
         </div>
         <div class="field full">
+          <label for="calc-jetzt">Was du jetzt im Monat zahlst</label>
+          <input id="calc-jetzt" inputmode="decimal" placeholder="z. B. 98" autocomplete="off">
+        </div>
+        <div class="field full">
           <div class="presets" id="presets"></div>
         </div>
       </div>
       <div class="result">
         <div class="result-anchor">
-          <span>Durchschnittspreis</span>
-          <s id="out-ref">–</s>
+          <span id="out-platz">Platz</span>
+          <strong id="out-anbieter">–</strong>
         </div>
-        <div class="result-label">Dein Preis bei E1<span id="out-context"></span></div>
+        <div class="result-label">Neuer Preis<span id="out-context"></span></div>
         <div class="result-top">
           <div class="result-price"><span id="out-jahr">–</span><small> € / Jahr</small></div>
           <div class="saving" id="out-saving">–</div>
         </div>
         <div class="result-rows">
-          <div class="result-row"><span>entspricht pro Monat</span><strong id="out-monat">–</strong></div>
+          <div class="result-row"><span>Zahlt jetzt im Monat</span><strong id="out-jetzt">–</strong></div>
+          <div class="result-row"><span>Neuer Preis im Monat</span><strong id="out-monat">–</strong></div>
           <div class="result-row"><span>Ersparnis pro Jahr</span><strong id="out-sparen">–</strong></div>
         </div>
-        <div class="calc-note">Unverbindliche Beispielrechnung auf Basis der hinterlegten E1-Tarife. Der finale Preis hängt von Netzgebiet, Zählertyp und Bonität ab.</div>
+        <div class="presets" id="calc-tarife"></div>
+        <div class="calc-note">24 Monate Preisgarantie. Die Ersparnis rechnet gegen das, was du jetzt im Monat zahlst.</div>
       </div>
       <a class="btn btn-primary btn-block" href="#anfrage">Kostenloses Angebot anfordern</a>
       <p class="micro center">Keine Zahlungsdaten. Kein Vertrag. Nur eine Anfrage.</p>
@@ -534,6 +540,6 @@
   </div>
 </footer>
 
-<script src="/assets/app.js?v=3"></script>
+<script src="/assets/app.js?v=4"></script>
 </body>
 </html>

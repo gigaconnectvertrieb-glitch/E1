@@ -1602,6 +1602,12 @@ h1, h2, h3 {
   text-decoration-color: rgba(255, 255, 255, 0.3);
 }
 
+.result-anchor strong {
+  color: var(--text);
+  font-size: 14px;
+  text-align: right;
+}
+
 .stats-band {
   border-block: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.015);
