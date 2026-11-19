@@ -984,6 +984,24 @@ async function handleApi(req, res, url, pathname) {
     return json(res, 200, { ok: true, ...(await portal.status()) });
   }
 
+  if (pathname === '/api/admin/portal/session' && req.method === 'POST') {
+    if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
+    if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });
+    let body;
+    try {
+      body = await readJson(req);
+    } catch (err) {
+      return json(res, err.status || 400, { ok: false, error: err.message || 'invalid_json' });
+    }
+    try {
+      const saved = await portal.importSession(body.cookies);
+      return json(res, 200, { ok: true, url: saved.url });
+    } catch (err) {
+      console.error('portal session:', err.message);
+      return json(res, 502, { ok: false, error: err.message });
+    }
+  }
+
   if (pathname === '/api/admin/portal/code' && req.method === 'POST') {
     if (!sameOrigin(req)) return json(res, 403, { ok: false, error: 'origin' });
     if (!sessionId(req)) return json(res, 401, { ok: false, error: 'auth' });

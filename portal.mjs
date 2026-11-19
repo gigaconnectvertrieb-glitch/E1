@@ -217,6 +217,16 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     return login();
   }
 
+  async function importSession(nextJar) {
+    if (!nextJar || typeof nextJar !== 'object' || !nextJar.fe_typo_user) {
+      throw new Error('session_missing');
+    }
+    const check = await request(base + '/buero/', { jar: nextJar });
+    if (hasMfa(check.html) || !isLoggedIn(check.html)) throw new Error('session_rejected');
+    await saveJar(nextJar);
+    return { url: check.url, status: check.status };
+  }
+
   async function fetchPage(targetPath) {
     const session = await ensure();
     const page = await request(base + (targetPath || path), { jar: session.jar });
@@ -362,6 +372,7 @@ export function createPortal({ store, baseUrl, user, pass, tariffPath }) {
     ensure,
     fetchPage,
     login,
+    importSession,
     submitCode: takePendingCode,
     hasMfa,
     isLoggedIn,
