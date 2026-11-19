@@ -23,6 +23,8 @@
   var offerEl = document.getElementById('offer');
   var metaEl = document.getElementById('meta');
   var altsEl = document.getElementById('alts');
+  var platzEl = document.getElementById('platz');
+  var anbieterEl = document.getElementById('anbieter');
 
   var pickedId = '';
   var sparte = 'strom';
@@ -62,6 +64,8 @@
 
   function paint(data, rate) {
     if (!rate) {
+      platzEl.textContent = '';
+      anbieterEl.textContent = '';
       heroEl.textContent = '—';
       heroEl.classList.add('is-flat');
       kicker.textContent = 'Ersparnis';
@@ -77,34 +81,42 @@
       altsEl.innerHTML = '';
       return;
     }
+    var list = tariffList(data);
+    var platz = rate.platz || (list.findIndex(function (item) { return item.id === rate.id; }) + 1);
     var aktuell = money(aktuellEl.value);
+    var abschlag = money(abschlagEl.value);
     var jahr = rate.jahrespreis;
+    var neuMonat = jahr / 12;
+    var jetztMonat = abschlag != null ? abschlag : (aktuell == null ? null : aktuell / 12);
     var save = aktuell == null ? null : aktuell - jahr;
     var month = save == null ? null : save / 12;
     var over24 = save == null ? null : save * 2;
+    platzEl.textContent = 'Platz ' + platz + ' von ' + list.length;
+    anbieterEl.textContent = rate.anbieter || rate.name;
     heroEl.classList.toggle('is-flat', save == null || save <= 0);
     kicker.textContent = save != null && save > 0 ? 'Ersparnis' : 'Neuer Preis';
     if (save != null && save > 0) {
       var pct = aktuell > 0 ? Math.round((save / aktuell) * 100) : 0;
       heroEl.textContent = euro.format(save);
       heroLabel.textContent = 'weniger im Jahr' + (pct ? ' · ' + pct + ' %' : '');
-      subsaveEl.textContent = euro.format(month) + ' im Monat · ' + euro.format(over24) + ' über 24 Monate';
+      subsaveEl.textContent = euro.format(month) + ' weniger im Monat · ' + euro.format(over24) + ' über 24 Monate';
     } else if (save != null) {
       heroEl.textContent = euro.format(jahr);
-      heroLabel.textContent = 'kein Preisvorteil bei diesem Verbrauch';
-      subsaveEl.textContent = euro.format(jahr / 12) + ' im Monat';
+      heroLabel.textContent = 'kein Preisvorteil gegen die aktuellen Kosten';
+      subsaveEl.textContent = euro.format(neuMonat) + ' im Monat';
     } else {
       heroEl.textContent = euro.format(jahr);
-      heroLabel.textContent = 'im Jahr. Jahreskosten vom Kunden eintragen, dann kommt die Ersparnis.';
-      subsaveEl.textContent = euro.format(jahr / 12) + ' im Monat';
+      heroLabel.textContent = 'im Jahr. Oben eintragen, was der Kunde jetzt zahlt.';
+      subsaveEl.textContent = euro.format(neuMonat) + ' im Monat';
     }
-    compareEl.hidden = aktuell == null;
-    if (aktuell != null) {
-      nowEl.textContent = euro.format(aktuell);
-      nextEl.textContent = euro.format(jahr);
-      deltaEl.textContent = euro.format(save);
-    }
-    offerEl.textContent = (rate.anbieter ? rate.anbieter + ' · ' : '') + rate.name + ' · 24 Monate Preisgarantie';
+    compareEl.hidden = false;
+    nowEl.textContent = aktuell == null ? '—' : euro.format(aktuell);
+    nextEl.textContent = euro.format(jahr);
+    deltaEl.textContent = save == null ? '—' : euro.format(save);
+    nowEl.parentNode.querySelector('span').textContent = jetztMonat == null ? 'Zahlt jetzt' : 'Zahlt jetzt · ' + euro.format(jetztMonat) + '/Monat';
+    nextEl.parentNode.querySelector('span').textContent = 'Neuer Preis · ' + euro.format(neuMonat) + '/Monat';
+    deltaEl.parentNode.querySelector('span').textContent = month == null ? 'Ersparnis' : 'Ersparnis · ' + euro.format(month) + '/Monat';
+    offerEl.textContent = rate.name + ' · 24 Monate Preisgarantie';
     var bits = [];
     if (rate.arbeitspreisCt != null) bits.push(rate.arbeitspreisCt.toLocaleString('de-DE', { maximumFractionDigits: 2 }) + ' ct');
     if (rate.grundpreisJahr != null) bits.push(Math.round(rate.grundpreisJahr) + ' € Grundpreis/Jahr');
@@ -112,16 +124,24 @@
     bits.push(Math.round(rate.provisionEuro) + ' € Provision');
     metaEl.textContent = bits.join(' · ');
     altsEl.innerHTML = '';
-    (data.alternativen || []).forEach(function (alt) {
+    list.forEach(function (alt) {
       var button = document.createElement('button');
       button.type = 'button';
-      button.innerHTML = '<span>' + euro.format(alt.jahrespreis) + '</span>' + alt.name;
+      if (alt.id === rate.id) button.className = 'is-on';
+      var altSave = aktuell == null ? '' : ' · ' + euro.format(aktuell - alt.jahrespreis);
+      button.innerHTML = '<span>Platz ' + alt.platz + altSave + '</span>' + (alt.anbieter || alt.name) + ' · ' + euro.format(alt.jahrespreis);
       button.addEventListener('click', function () {
         pickedId = alt.id;
         paint(data, alt);
       });
       altsEl.appendChild(button);
     });
+  }
+
+  function tariffList(data) {
+    if (!data) return [];
+    if (data.tarife && data.tarife.length) return data.tarife;
+    return data.best ? [data.best].concat(data.alternativen || []) : [];
   }
 
   function poll(force) {
@@ -149,8 +169,8 @@
           paint(null, null);
           return;
         }
-        var list = res.body.best ? [res.body.best].concat(res.body.alternativen || []) : [];
-        var rate = list.filter(function (item) { return item.id === pickedId; })[0] || res.body.best;
+        var list = tariffList(res.body);
+        var rate = list.filter(function (item) { return item.id === pickedId; })[0] || list[0];
         if (rate) pickedId = rate.id;
         paint(res.body, rate || null);
         var when = res.body.syncedAt ? new Date(res.body.syncedAt).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '';

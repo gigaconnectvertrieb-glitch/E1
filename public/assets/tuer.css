@@ -146,6 +146,23 @@
   padding: 22px 20px 26px;
 }
 
+.tuer-platz {
+  margin: 0 0 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tuer-anbieter {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-weight: 760;
+}
+
 .tuer-hero {
   margin: 8px 0 0;
   font-size: clamp(64px, 12vw, 120px);
@@ -203,6 +220,16 @@
 .tuer-alts button {
   padding: 8px 12px;
   text-align: left;
+}
+
+.tuer-alts button.is-on {
+  background: var(--accent);
+  color: #102006;
+  border-color: var(--accent);
+}
+
+.tuer-alts button.is-on span {
+  color: #102006;
 }
 
 body.is-kunde .nur-berater {

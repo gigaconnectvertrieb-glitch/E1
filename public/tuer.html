@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#06080a">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/styles.css?v=4">
-  <link rel="stylesheet" href="/assets/tuer.css?v=3">
+  <link rel="stylesheet" href="/assets/tuer.css?v=4">
 </head>
 <body class="tuer-body">
   <main class="tuer-wrap">
@@ -41,16 +41,18 @@
           <input id="kwh" inputmode="numeric" value="3500">
         </label>
         <div class="tuer-presets" id="presets"></div>
-        <label>Aktuelle Jahreskosten
-          <input id="aktuell" inputmode="decimal" placeholder="z. B. 1460">
+        <label>Was der Kunde jetzt im Jahr zahlt
+          <input id="aktuell" inputmode="decimal" placeholder="z. B. 1176">
         </label>
         <label>oder Abschlag im Monat
-          <input id="abschlag" inputmode="decimal" placeholder="× 12">
+          <input id="abschlag" inputmode="decimal" placeholder="z. B. 98">
         </label>
         <p class="tuer-note" id="status">Standort holen, dann erscheint der günstigste 24-Monats-Tarif ab 150 € Provision.</p>
       </section>
 
       <section class="tuer-result" id="result" aria-live="polite">
+        <p class="tuer-platz" id="platz"></p>
+        <p class="tuer-anbieter" id="anbieter"></p>
         <p class="tuer-kicker" id="result-kicker">Ersparnis</p>
         <p class="tuer-hero" id="hero">—</p>
         <p class="tuer-hero-label" id="hero-label">Jahreskosten vom Kunden eintragen</p>
@@ -66,6 +68,6 @@
       </section>
     </div>
   </main>
-  <script src="/assets/tuer.js?v=3"></script>
+  <script src="/assets/tuer.js?v=4"></script>
 </body>
 </html>

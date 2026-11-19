@@ -959,8 +959,13 @@ async function handleApi(req, res, url, pathname) {
         ohne24: ranked.droppedGuarantee || 0,
         felder: best ? undefined : ranked.sampleKeys,
         syncedAt: new Date().toISOString(),
-        best,
-        alternativen: ranked.qualified.slice(1, 4),
+        best: ranked.qualified[0] ? { ...ranked.qualified[0], platz: 1 } : null,
+        tarife: ranked.qualified.map(function (rate, index) {
+          return { ...rate, platz: index + 1 };
+        }),
+        alternativen: ranked.qualified.slice(1).map(function (rate, index) {
+          return { ...rate, platz: index + 2 };
+        }),
         cache: false
       };
       if (best) tuerCache.set(cacheKey, { at: Date.now(), payload });
